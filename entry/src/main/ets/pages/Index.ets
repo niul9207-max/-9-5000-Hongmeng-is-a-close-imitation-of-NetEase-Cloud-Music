@@ -1,6 +1,6 @@
 import { AvplayerUtils } from '../utils/AvplayerUtils'
 import { emitter } from '@kit.BasicServicesKit'
-import { playertunnel, playertunnel1, player_0, player_1, PlayState } from '../utils/common'
+import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1, PlayState } from '../utils/common'
 
 @Entry
 @Component
@@ -10,12 +10,18 @@ struct Index {
 // @State isplayer:boolean=true
 //   @State total:number=0
 //   @State time:number=0
+  @State
   playstate:PlayState= new PlayState()
 
-
-
-  aboutToAppear(): void {
-    AvplayerUtils.init()
+  //千算万算没算到init是异步的所以这个赋值会直接错过去,要么就等,用emitter传值我没试过,刚写好没试过,等会试试
+  async aboutToAppear(): Promise<void> {
+    await AvplayerUtils.init()
+    this.playstate=AvplayerUtils.playstate
+    console.log('ken',JSON.stringify(this.playstate))
+    // emitter.on(playertunnel2,(date:emitter.EventData)=>{
+    //   let d=date.data as players
+    //   this.playstate=JSON.parse(d.mydata)
+    // })
     emitter.once(playertunnel,(date:emitter.EventData)=>{
       let d=date.data as player_0
       this.playstate.duration=d.total
@@ -27,7 +33,7 @@ struct Index {
   }
   build() {
     Column() {
-      Image(this.playstate.img).height(200).aspectRatio(1).borderRadius(100)
+      Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover).backgroundColor(Color.Red)
       Row(){
         Image($r('app.media.pre')).onClick((event: ClickEvent) => {
 

@@ -38,7 +38,7 @@
  */
 import media from "@ohos.multimedia.media"
 import { emitter } from "@kit.BasicServicesKit"
-import { playertunnel, playertunnel1, PlayState, songs } from "./common"
+import { playertunnel, playertunnel1, playertunnel2, PlayState, songs } from "./common"
 
 export class AvplayerUtils{
   static avplayer:media.AVPlayer=null!
@@ -74,7 +74,10 @@ export class AvplayerUtils{
       AvplayerUtils.playstate.author=songs[0].author
       AvplayerUtils.playstate.playIndex=0
       AvplayerUtils.playstate.playList=songs
-
+      console.log('ken','静态类里面'+JSON.stringify(AvplayerUtils.playstate))
+    //   emitter.emit(playertunnel2,{data:{
+    // 'mydata':JSON.stringify(AvplayerUtils.playstate)
+    //   }})
 
 
    }
@@ -94,9 +97,19 @@ export class AvplayerUtils{
       AvplayerUtils.avplayer.pause()
    }
    static pre(){
+      AvplayerUtils.avplayer.reset()
 
    }
    static  next(){
+      if(AvplayerUtils.playstate.playIndex>=AvplayerUtils.playstate.playList.length){
+        return;
+      }
+     let ind=AvplayerUtils.playstate.playIndex++
+     AvplayerUtils.avplayer.reset()
+     AvplayerUtils.playstate.img=songs[ind].img
+     AvplayerUtils.playstate.name=songs[ind].name
+     AvplayerUtils.playstate.url=songs[ind].url
+     AvplayerUtils.playstate.author=songs[ind].author
 
    }
  }

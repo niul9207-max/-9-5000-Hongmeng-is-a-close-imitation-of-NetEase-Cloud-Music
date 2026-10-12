@@ -1,5 +1,6 @@
 export let playertunnel='0'
 export let playertunnel1='1'
+export let playertunnel2='2'
 
 export interface player_0{
   total:number
@@ -7,6 +8,10 @@ export interface player_0{
 
 export interface player_1{
   time:number
+}
+
+export interface players{
+  mydata:string
 }
 
 export class PlayState {
@@ -18,7 +23,7 @@ export class PlayState {
   playIndex: number = 0 // 当前在播放列表中的播放索引  *
   time: number = 0 // 播放时间  *
   duration: number = 0 // 音乐的播放时长 *
-  isPlay: boolean = false // 是否正在播放
+  isPlay: boolean = true // 是否正在播放
   playMode: 'auto' | 'repeat' | 'random' = "auto" // 播放模式
   playList: SongItemType[] = [] // 当前的播放列表
   cacheImg?: string // 缓存图片地址--只有这个现在暂时不需要考虑
