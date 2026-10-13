@@ -121,43 +121,7 @@ find()
 struct me {
   list:looperlist=new looperlist()
   build() {
-    Row(){
-      List(){
-        LazyForEach(this.list,(item:RecommendListType)=>{
-          ListItem(){
-            Image(item.img).borderRadius(10)
-          }.padding(10)
 
-        })
-      }.scrollBar(BarState.Off)
-     .width('25%')
-      List({initialIndex:2}){
-        LazyForEach(this.list,(item:RecommendListType)=>{
-          ListItem(){
-            Image(item.img).borderRadius(10)
-          }.padding(10)
-
-        })
-      }.scrollBar(BarState.Off)
-     .width('25%')
-      List({initialIndex:5}){
-        LazyForEach(this.list,(item:RecommendListType)=>{
-          ListItem(){
-            Image(item.img).borderRadius(10)
-          }.padding(10)
-
-        })
-      }.scrollBar(BarState.Off)
-     .width('25%')
-      List({initialIndex:2}){
-        LazyForEach(this.list,(item:RecommendListType)=>{
-          ListItem(){
-            Image(item.img).borderRadius(10)
-          }.padding(10)
-
-        })
-      }.scrollBar(BarState.Off)
-     .width('25%')
 
 
       // Swiper(){
@@ -214,33 +178,77 @@ struct me {
       //   })
       // }.width('25%')
 
-      // Stack({alignContent:Alignment.Bottom}){
-      //   Column({space:15}){
-      //     Text('我的云音乐').fontColor(Color.White)
-      //     Row(){
-      //       Row(){
-      //         Image($r('app.media.ic_boy')).width(10)
-      //         Text('00后').fontColor('#555555').fontColor('#555555')
-      //       }
-      //
-      //       Text('五行座').fontColor('#555555')
-      //       Text('长沙').fontColor('#555555')
-      //       Text('歌龄100年').fontColor('#555555')
-      //     }.width('80%')
-      //     .justifyContent(FlexAlign.SpaceAround)
-      //     Row(){
-      //       Text('10w关注').fontColor('#555555')
-      //       Text('1000w粉丝').fontColor('#555555')
-      //       Text('100亿赞').fontColor('#555555')
-      //     }.width('80%')
-      //     .justifyContent(FlexAlign.SpaceAround)
-      //
-      //   }.width('100%')
-      //   .alignItems(HorizontalAlign.Center)
-      //   // .height('100%')
-      //
-      //
-      // }.backgroundColor('#121215')
+      Stack({alignContent:Alignment.Bottom}){
+        Row(){
+          List(){
+            LazyForEach(this.list,(item:RecommendListType)=>{
+              ListItem(){
+                Image(item.img).borderRadius(10)
+              }.padding(10)
+
+            })
+          }.scrollBar(BarState.Off)
+          .width('25%')
+          List({initialIndex:2}){
+            LazyForEach(this.list,(item:RecommendListType)=>{
+              ListItem(){
+                Image(item.img).borderRadius(10)
+              }.padding(10)
+
+            })
+          }.scrollBar(BarState.Off)
+          .width('25%')
+          List({initialIndex:5}){
+            LazyForEach(this.list,(item:RecommendListType)=>{
+              ListItem(){
+                Image(item.img).borderRadius(10)
+              }.padding(10)
+
+            })
+          }.scrollBar(BarState.Off)
+          .width('25%')
+          List({initialIndex:2}){
+            LazyForEach(this.list,(item:RecommendListType)=>{
+              ListItem(){
+                Image(item.img).borderRadius(10)
+              }.padding(10)
+
+            })
+          }.scrollBar(BarState.Off)
+          .width('25%')
+
+
+
+      }.backgroundColor('#121215')
+        .height('100%')
+        .width('100%')
+        Column({space:15}){
+          Image($r('app.media.logo')).height(70).offset({ y: -30 })
+          Text('我的云音乐').fontColor(Color.White)
+          Row(){
+            Row(){
+              Image($r('app.media.ic_boy')).width(10)
+              Text('00后').fontColor('#555555').fontColor('#555555')
+            }
+
+            Text('五行座').fontColor('#555555')
+            Text('长沙').fontColor('#555555')
+            Text('歌龄100年').fontColor('#555555')
+          }.width('80%')
+          .justifyContent(FlexAlign.SpaceAround)
+          Row(){
+            Text('10w关注').fontColor('#555555')
+            Text('1000w粉丝').fontColor('#555555')
+            Text('100亿赞').fontColor('#555555')
+          }.width('80%')
+          .justifyContent(FlexAlign.SpaceAround)
+
+        }.width('100%')
+        .height(200)
+        .alignItems(HorizontalAlign.Center)
+        .backgroundColor('#121215')
+        .zIndex(100)
+        // .height('100%')
     }.height('100%')
     .width('100%')
     .backgroundColor('#121215')
