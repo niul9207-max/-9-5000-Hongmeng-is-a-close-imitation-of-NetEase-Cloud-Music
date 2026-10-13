@@ -15,14 +15,16 @@ struct Index {
 
   //千算万算没算到init是异步的所以这个赋值会直接错过去,要么就等,用emitter传值我没试过,刚写好没试过,等会试试
   async aboutToAppear(): Promise<void> {
-    await AvplayerUtils.init()
-    this.playstate=AvplayerUtils.playstate
-    console.log('ken',JSON.stringify(this.playstate))
-    // emitter.on(playertunnel2,(date:emitter.EventData)=>{
-    //   let d=date.data as players
-    //   this.playstate=JSON.parse(d.mydata)
-    // })
-    emitter.once(playertunnel,(date:emitter.EventData)=>{
+    emitter.on(playertunnel2,(date:emitter.EventData)=>{
+      let d=date.data as players
+      this.playstate=JSON.parse(d.mydata)
+      console.log('ken','现在数据'+JSON.stringify(d.mydata))
+    })
+     AvplayerUtils.init()
+    // this.playstate=AvplayerUtils.playstate
+    // console.log('ken',JSON.stringify(this.playstate))
+
+    emitter.on(playertunnel,(date:emitter.EventData)=>{
       let d=date.data as player_0
       this.playstate.duration=d.total
     })
@@ -33,10 +35,37 @@ struct Index {
   }
   build() {
     Column() {
-      Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover).backgroundColor(Color.Red)
+      Stack(){
+        Image($r('app.media.ic_cd')).height(300).width(300).borderRadius(150)
+        Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover)
+          // .backgroundColor(Color.Red)
+          .margin({top:150})
+      }.alignContent(Alignment.Center)
+
+
+      Column(){
+        Text(this.playstate.name).fontSize(22).fontWeight(FontWeight.Bold)
+        Text(this.playstate.author).fontSize(13)
+      }.layoutWeight(1)
+
+      .justifyContent(FlexAlign.Center)
+
+      Row(){
+        Text(Math.floor((this.playstate.time)/1000/60)+':'+Math.floor((this.playstate.time)/1000%60))
+        Slider({
+          min:0,
+          max:this.playstate.duration,
+          value:this.playstate.time
+        }).onChange((val)=>{
+          this.playstate.time=val
+          AvplayerUtils.avplayer.seek(val)
+        }).layoutWeight(1)
+        Text(Math.floor((this.playstate.duration)/1000/60)+':'+Math.floor((this.playstate.duration)/1000%60))
+      }
       Row(){
         Image($r('app.media.pre')).onClick((event: ClickEvent) => {
-
+          this.isone=true
+          AvplayerUtils.pre()
         }).height(30).aspectRatio(1)
         Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
           if(this.playstate.isPlay){
@@ -53,23 +82,19 @@ struct Index {
           this.playstate.isPlay=!this.playstate.isPlay
         }).height(30).aspectRatio(1)
         Image($r('app.media.next')).onClick((event: ClickEvent) => {
-
+          this.isone=true
+          AvplayerUtils.next()
         }).height(30).aspectRatio(1)
 
-      }
-      Slider({
-        min:0,
-        max:this.playstate.duration,
-        value:this.playstate.time
-      }).onChange((val)=>{
-        this.playstate.time=val
-        AvplayerUtils.avplayer.seek(val)
-      })
-      Row(){
-        Text(this.playstate.time+'')
-        Text(this.playstate.duration+'')
-      }.width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
+      }.justifyContent(FlexAlign.SpaceAround)
+      .width('100%')
+
+
+      // Row(){
+      //
+      //
+      // }.width('100%')
+      // .justifyContent(FlexAlign.SpaceBetween)
     }
     .height('100%')
     .width('100%')

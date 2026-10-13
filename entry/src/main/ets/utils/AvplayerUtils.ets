@@ -75,9 +75,9 @@ export class AvplayerUtils{
       AvplayerUtils.playstate.playIndex=0
       AvplayerUtils.playstate.playList=songs
       console.log('ken','静态类里面'+JSON.stringify(AvplayerUtils.playstate))
-    //   emitter.emit(playertunnel2,{data:{
-    // 'mydata':JSON.stringify(AvplayerUtils.playstate)
-    //   }})
+      emitter.emit(playertunnel2,{data:{
+    'mydata':JSON.stringify(AvplayerUtils.playstate)
+      }})
 
 
    }
@@ -98,18 +98,35 @@ export class AvplayerUtils{
    }
    static pre(){
       AvplayerUtils.avplayer.reset()
-
-   }
-   static  next(){
-      if(AvplayerUtils.playstate.playIndex>=AvplayerUtils.playstate.playList.length){
-        return;
-      }
-     let ind=AvplayerUtils.playstate.playIndex++
+     let ind=--AvplayerUtils.playstate.playIndex
      AvplayerUtils.avplayer.reset()
      AvplayerUtils.playstate.img=songs[ind].img
      AvplayerUtils.playstate.name=songs[ind].name
      AvplayerUtils.playstate.url=songs[ind].url
      AvplayerUtils.playstate.author=songs[ind].author
+     console.log('ken','状态上:'+AvplayerUtils.avplayer.state)
+     AvplayerUtils.play()
+     console.log('ken','状态下:'+AvplayerUtils.avplayer.state)
+     emitter.emit(playertunnel2,{data:{
+       'mydata':JSON.stringify(AvplayerUtils.playstate)
+     }})
 
+   }
+   static  next(){
+      if(AvplayerUtils.playstate.playIndex>=AvplayerUtils.playstate.playList.length-1){
+        return;
+      }
+     let ind=++AvplayerUtils.playstate.playIndex
+     AvplayerUtils.avplayer.reset()
+     AvplayerUtils.playstate.img=songs[ind].img
+     AvplayerUtils.playstate.name=songs[ind].name
+     AvplayerUtils.playstate.url=songs[ind].url
+     AvplayerUtils.playstate.author=songs[ind].author
+     console.log('ken','状态上:'+AvplayerUtils.avplayer.state)
+     AvplayerUtils.play()
+     console.log('ken','状态下:'+AvplayerUtils.avplayer.state)
+     emitter.emit(playertunnel2,{data:{
+       'mydata':JSON.stringify(AvplayerUtils.playstate)
+     }})
    }
  }
