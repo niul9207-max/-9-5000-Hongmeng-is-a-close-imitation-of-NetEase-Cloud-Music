@@ -7,7 +7,8 @@ import {
   SongItemType, songs } from '../utils/common';
 import { emitter } from '@kit.BasicServicesKit';
 import { dailyRecommend, momentList, recommendList, swiperList } from '../constant/MusicConstants';
-import { MomentListType, RecommendDailyType, RecommendListType } from '../module/player';
+import { looperlist, MomentListType, RecommendDailyType, RecommendListType } from '../module/player';
+
 
 @Entry
 @Component
@@ -78,7 +79,7 @@ find()
           this.bottomicon($r('app.media.ic_moment'),'动态')
         )
         TabContent(){
-          Text('我的')
+          me()
         }.tabBar(
           this.bottomicon($r('app.media.ic_mine'),'我的')
         )
@@ -113,6 +114,138 @@ find()
     }
     .height('100%')
     .width('100%')
+  }
+}
+
+@Component
+struct me {
+  list:looperlist=new looperlist()
+  build() {
+    Row(){
+      List(){
+        LazyForEach(this.list,(item:RecommendListType)=>{
+          ListItem(){
+            Image(item.img).borderRadius(10)
+          }.padding(10)
+
+        })
+      }.scrollBar(BarState.Off)
+     .width('25%')
+      List({initialIndex:2}){
+        LazyForEach(this.list,(item:RecommendListType)=>{
+          ListItem(){
+            Image(item.img).borderRadius(10)
+          }.padding(10)
+
+        })
+      }.scrollBar(BarState.Off)
+     .width('25%')
+      List({initialIndex:5}){
+        LazyForEach(this.list,(item:RecommendListType)=>{
+          ListItem(){
+            Image(item.img).borderRadius(10)
+          }.padding(10)
+
+        })
+      }.scrollBar(BarState.Off)
+     .width('25%')
+      List({initialIndex:2}){
+        LazyForEach(this.list,(item:RecommendListType)=>{
+          ListItem(){
+            Image(item.img).borderRadius(10)
+          }.padding(10)
+
+        })
+      }.scrollBar(BarState.Off)
+     .width('25%')
+
+
+      // Swiper(){
+      //     ForEach(recommendList,(item:RecommendListType)=>{
+      //       ListItem(){Image(item.img)}
+      //
+      //     })
+      // }.width('25%')
+      // .loop(true)
+      // Swiper(){
+      //     ForEach(recommendList,(item:RecommendListType)=>{
+      //       ListItem(){Image(item.img)}
+      //
+      //     })
+      // }.width('25%')
+      // .loop(true)
+      // Swiper(){
+      //     ForEach(recommendList,(item:RecommendListType)=>{
+      //       ListItem(){Image(item.img)}
+      //
+      //     })
+      // }.width('25%')
+      // .loop(true)
+      // Swiper(){
+      //     ForEach(recommendList,(item:RecommendListType)=>{
+      //       ListItem(){Image(item.img)}
+      //
+      //     })
+      // }.width('25%')
+      // .loop(true)
+
+      // List(){
+      //   ForEach(recommendList,(item:RecommendListType)=>{
+      //     ListItem(){Image(item.img)}
+      //
+      //   })
+      // }.width('25%')
+      // List(){
+      //   ForEach(recommendList,(item:RecommendListType)=>{
+      //     ListItem(){Image(item.img)}
+      //
+      //   })
+      // }.width('25%')
+      // List(){
+      //   ForEach(recommendList,(item:RecommendListType)=>{
+      //     ListItem(){Image(item.img)}
+      //
+      //   })
+      // }.width('25%')
+      // List(){
+      //   ForEach(recommendList,(item:RecommendListType)=>{
+      //     ListItem(){Image(item.img)}
+      //
+      //   })
+      // }.width('25%')
+
+      // Stack({alignContent:Alignment.Bottom}){
+      //   Column({space:15}){
+      //     Text('我的云音乐').fontColor(Color.White)
+      //     Row(){
+      //       Row(){
+      //         Image($r('app.media.ic_boy')).width(10)
+      //         Text('00后').fontColor('#555555').fontColor('#555555')
+      //       }
+      //
+      //       Text('五行座').fontColor('#555555')
+      //       Text('长沙').fontColor('#555555')
+      //       Text('歌龄100年').fontColor('#555555')
+      //     }.width('80%')
+      //     .justifyContent(FlexAlign.SpaceAround)
+      //     Row(){
+      //       Text('10w关注').fontColor('#555555')
+      //       Text('1000w粉丝').fontColor('#555555')
+      //       Text('100亿赞').fontColor('#555555')
+      //     }.width('80%')
+      //     .justifyContent(FlexAlign.SpaceAround)
+      //
+      //   }.width('100%')
+      //   .alignItems(HorizontalAlign.Center)
+      //   // .height('100%')
+      //
+      //
+      // }.backgroundColor('#121215')
+    }.height('100%')
+    .width('100%')
+    .backgroundColor('#121215')
+
+
   }
 }
 
@@ -168,6 +301,7 @@ struct homeitem {
             })
           }
           .listDirection(Axis.Horizontal)
+          .scrollBar(BarState.Off)
         }.borderRadius(20)
 
       }.margin({top:20})
@@ -199,6 +333,7 @@ struct homeitem {
             }
           })
         }.listDirection(Axis.Horizontal)
+        .scrollBar(BarState.Off)
       }
 
     }.height('100%')
@@ -346,21 +481,26 @@ struct Dynamic {
           .fontColor(Color.White)
       }
       .height(60)
+      .margin({left:20})
 
         ForEach(momentList,(item:MomentListType)=>{
           ListItem(){
-            Column(){
+            Column({space:10}){
               Text(item.author).fontSize(20).fontColor('#E9E9E7')
               Text(item.content).fontSize(16).fontColor('#424145')
               Row(){
-                Image(item.song.img).width(60)
+                Image(item.song.img).width(60).borderRadius({topLeft:10,bottomLeft:10})
                 Column(){
                   Text(item.song.name).fontSize(16).fontWeight(FontWeight.Bold).fontColor('#E9E9E7')
-                  Text(item.song.author).fontSize(14).fontColor('#424145')
+                  Text(item.song.author).fontSize(14).fontColor('#A8A8AD')
 
-                }
-                Image($r('app.media.ic_single_play')).width(20)
-              }
+                }.alignItems(HorizontalAlign.Start)
+                .margin({left:10})
+                Blank()
+                Image($r('app.media.ic_single_play')).width(20).fillColor(Color.White)
+              }.backgroundColor('#46474C')
+              .width('100%')
+              .borderRadius(10)
               Row(){
                 Row(){
                   Image($r('app.media.ic_share')).width(20)
@@ -375,8 +515,14 @@ struct Dynamic {
                   Text(item.like+'').fontSize(16).fontColor('#424145')
                 }
 
-              }
-            }
+
+              }.margin({bottom:20})
+              .justifyContent(FlexAlign.SpaceBetween)
+              .width('100%')
+              Divider().color(Color.White)
+            }.width('80%')
+            .alignItems(HorizontalAlign.Start)
+            .margin({bottom:30,left:30})
           }
 
 

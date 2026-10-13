@@ -1,3 +1,27 @@
+import { recommendList } from "../constant/MusicConstants"
+
+export class looperlist implements IDataSource{
+  private list:RecommendListType[]=recommendList
+
+  totalCount(): number {
+    return 10000
+  }
+
+  getData(index: number): RecommendListType {
+    return this.list[index%this.list.length]
+  }
+
+  registerDataChangeListener(listener: DataChangeListener): void {
+
+  }
+
+  unregisterDataChangeListener(listener: DataChangeListener): void {
+
+  }
+
+}
+
+
 export interface TabClass {
   title: string
   name: string
