@@ -38,7 +38,7 @@
  */
 import media from "@ohos.multimedia.media"
 import { emitter } from "@kit.BasicServicesKit"
-import { playertunnel, playertunnel1, playertunnel2, PlayState, songs } from "./common"
+import { players, playertunnel, playertunnel1, playertunnel2, PlayState, songs } from "./common"
 
 export class AvplayerUtils{
   static avplayer:media.AVPlayer=null!
@@ -68,16 +68,18 @@ export class AvplayerUtils{
         emitter.emit(playertunnel1,{data:{'time':val}})
       })
       //接下来是对象处理环节
-      AvplayerUtils.playstate.img=songs[0].img
-      AvplayerUtils.playstate.name=songs[0].name
-      AvplayerUtils.playstate.url=songs[0].url
-      AvplayerUtils.playstate.author=songs[0].author
-      AvplayerUtils.playstate.playIndex=0
-      AvplayerUtils.playstate.playList=songs
-      console.log('ken','静态类里面'+JSON.stringify(AvplayerUtils.playstate))
-      emitter.emit(playertunnel2,{data:{
-    'mydata':JSON.stringify(AvplayerUtils.playstate)
-      }})
+      // AvplayerUtils.playstate.img=songs[0].img
+      // AvplayerUtils.playstate.name=songs[0].name
+      // AvplayerUtils.playstate.url=songs[0].url
+      // AvplayerUtils.playstate.author=songs[0].author
+      // AvplayerUtils.playstate.playIndex=0
+      // AvplayerUtils.playstate.playList=songs
+      // console.log('ken','静态类里面'+JSON.stringify(AvplayerUtils.playstate))
+      emitter.on(playertunnel2,(date:emitter.EventData)=>{
+        let d=date.data as players
+        AvplayerUtils.playstate=JSON.parse(d.mydata)
+        console.log('ken','AvplayerUtils81','现在数据'+JSON.stringify(d.mydata))
+      })
 
 
    }

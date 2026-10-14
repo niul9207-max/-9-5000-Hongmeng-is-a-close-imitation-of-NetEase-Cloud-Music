@@ -9,6 +9,7 @@ import { emitter } from '@kit.BasicServicesKit';
 import { dailyRecommend, momentList, recommendList, swiperList } from '../constant/MusicConstants';
 import { looperlist, MomentListType, RecommendDailyType, RecommendListType } from '../module/player';
 import { router, Router } from '@kit.ArkUI';
+import { ss } from '../constant/data';
 
 
 @Entry
@@ -37,7 +38,7 @@ struct PageIndex {
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
       this.playstate=JSON.parse(d.mydata)
-      console.log('ken','现在数据'+JSON.stringify(d.mydata))
+      console.log('ken','PageIndex41初始数据'+JSON.stringify(d.mydata))
     })
     AvplayerUtils.init()
     // this.playstate=AvplayerUtils.playstate
@@ -93,28 +94,33 @@ struct PageIndex {
       .height('100%')
       .width('100%')
       Row({space:20}){
-        Image($r('app.media.pre')).onClick((event: ClickEvent) => {
-          this.isone=true
-          AvplayerUtils.pre()
-        }).height(30).aspectRatio(1)
-        Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
-          if(this.playstate.isPlay){
-            if(this.isone){
-              AvplayerUtils.play()
-              this.isone=false
-            }else{
-              AvplayerUtils.resume()
-            }
+        Image(this.playstate.img).height(30).aspectRatio(1)
+        Blank()
+        Row(){
+          Image($r('app.media.pre')).onClick((event: ClickEvent) => {
+            this.isone=true
+            AvplayerUtils.pre()
+          }).height(30).aspectRatio(1)
+          Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
+            if(this.playstate.isPlay){
+              if(this.isone){
+                AvplayerUtils.play()
+                this.isone=false
+              }else{
+                AvplayerUtils.resume()
+              }
 
-          }else {
-            AvplayerUtils.pause()
-          }
-          this.playstate.isPlay=!this.playstate.isPlay
-        }).height(30).aspectRatio(1)
-        Image($r('app.media.next')).onClick((event: ClickEvent) => {
-          this.isone=true
-          AvplayerUtils.next()
-        }).height(30).aspectRatio(1)
+            }else {
+              AvplayerUtils.pause()
+            }
+            this.playstate.isPlay=!this.playstate.isPlay
+          }).height(30).aspectRatio(1)
+          Image($r('app.media.next')).onClick((event: ClickEvent) => {
+            this.isone=true
+            AvplayerUtils.next()
+          }).height(30).aspectRatio(1)
+        }
+
 
       }.justifyContent(FlexAlign.End).height(60).alignItems(VerticalAlign.Center)
       .width('100%')
@@ -437,6 +443,14 @@ struct manyou {
         .justifyContent(FlexAlign.Start)
         .width('100%')
         .margin({left:20,bottom:10})
+        .onClick(()=>{
+
+          ss.concat(songs)
+          emitter.emit(playertunnel2,{data:{
+            'mydata':JSON.stringify(AvplayerUtils.playstate)
+          }})
+
+        })
 
         List(){
           ForEach(songs,(item:SongItemType)=>{
@@ -449,6 +463,25 @@ struct manyou {
                 }.margin({left:10})
               }.borderRadius(20)
               .margin({left:20,bottom:10})
+              .onClick(()=>{
+                ss.unshift(item)
+                let s:PlayState= {
+                  img: item.img,
+                  name: item.name,
+                  author: item.author,
+                  url: item.url,
+                  playIndex: 0,
+                  time: 0,
+                  duration: 0,
+                  isPlay: false,
+                  playMode: 'auto',
+                  playList: ss
+                }
+                emitter.emit(playertunnel2,{data:{
+                  'mydata':JSON.stringify(s)
+                }})
+                console.log('ken','PageIndex471','数据传输情况'+JSON.stringify(ss))
+              })
             }
           })
         }.layoutWeight(1)
