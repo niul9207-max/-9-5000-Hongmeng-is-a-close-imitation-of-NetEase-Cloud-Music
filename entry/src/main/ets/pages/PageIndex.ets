@@ -109,7 +109,6 @@ struct PageIndex {
               }else{
                 AvplayerUtils.resume()
               }
-
             }else {
               AvplayerUtils.pause()
             }
@@ -307,6 +306,7 @@ struct homeitem {
                     .backgroundColor(item.top)
                     .width('100%')
                     .textAlign(TextAlign.Center)
+                    .borderRadius({topLeft:20,topRight:20})
 
 
                   Image(item.img).width('100%')
@@ -315,11 +315,12 @@ struct homeitem {
                     .width('100%')
                     .fontSize(12)
                     .layoutWeight(1)
+                    .borderRadius({bottomLeft:20,bottomRight:20})
 
                 }
                 // .height(150)
                 .width('30%')
-                .borderRadius(80)
+
                 .height(180)
                 .margin({right:10})
               }
@@ -444,14 +445,11 @@ struct manyou {
         .width('100%')
         .margin({left:20,bottom:10})
         .onClick(()=>{
-
-          ss.concat(songs)
-          emitter.emit(playertunnel2,{data:{
-            'mydata':JSON.stringify(AvplayerUtils.playstate)
-          }})
-
+          // ss.concat(songs)
+          // emitter.emit(playertunnel2,{data:{
+          //   'mydata':JSON.stringify(AvplayerUtils.playstate)
+          // }})
         })
-
         List(){
           ForEach(songs,(item:SongItemType)=>{
             ListItem(){
@@ -464,13 +462,15 @@ struct manyou {
               }.borderRadius(20)
               .margin({left:20,bottom:10})
               .onClick(()=>{
-                ss.unshift(item)
+                // ss.unshift(item)
+                console.log('ken','PageIndex466添加的数据',JSON.stringify(item))
+                ss.splice(AvplayerUtils.playstate.playIndex+1,0,item)
                 let s:PlayState= {
                   img: item.img,
                   name: item.name,
                   author: item.author,
                   url: item.url,
-                  playIndex: 0,
+                  playIndex: AvplayerUtils.playstate.playIndex+1,
                   time: 0,
                   duration: 0,
                   isPlay: false,

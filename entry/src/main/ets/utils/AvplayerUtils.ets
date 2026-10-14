@@ -39,13 +39,36 @@
 import media from "@ohos.multimedia.media"
 import { emitter } from "@kit.BasicServicesKit"
 import { players, playertunnel, playertunnel1, playertunnel2, PlayState, songs } from "./common"
+import { image } from "@kit.ImageKit"
+import { effectKit } from "@kit.ArkGraphics2D"
+import { http } from "@kit.NetworkKit"
 
 export class AvplayerUtils{
   static avplayer:media.AVPlayer=null!
   static playstate:PlayState=new PlayState()
   private constructor() {
   }
+
+
+  //这个函数从网络上拷贝下来的
+  async updateBg(url: string): Promise<string[]> {
+    // 下载封面为二进制数据
+    const res = await http.createHttp().request(url, { expectDataType: http.HttpDataType.ARRAY_BUFFER })
+    // 二进制 → PixelMap(像素图,取色器的输入)
+    const pixelMap = await image.createImageSource(res.result as ArrayBuffer).createPixelMap()
+    const picker = await effectKit.createColorPicker(pixelMap)
+    const c = await picker.getMainColor()   // 主色,含 red/green/blue/alpha,范围 0~255
+    let s:string[]=[]
+    s[0]=`rgb(${c.red},${c.green},${c.blue})`
+    s[1]=`rgb(${Math.floor(c.red * 0.4)},${Math.floor(c.green * 0.4)},${Math.floor(c.blue * 0.4)})`
+
+    // 底部用同一颜色压暗到 40%,形成上亮下暗的渐变
+    return s
+  }
+
+  //init函数主要就是建新的播放器对象还有,设置一些监听之类的
     static async init(){
+    if(AvplayerUtils.avplayer)return
     AvplayerUtils.avplayer=await  media.createAVPlayer()
       AvplayerUtils.avplayer.on('stateChange',(state)=>{
         switch (state){
@@ -55,6 +78,9 @@ export class AvplayerUtils{
           }
           case 'prepared':{
             AvplayerUtils.avplayer.play()
+          }
+          // 暂时不需要管播放模式的问题,直接默认顺序播放就行
+          case 'stopped':{
 
           }
 
@@ -99,13 +125,20 @@ export class AvplayerUtils{
       AvplayerUtils.avplayer.pause()
    }
    static pre(){
+     if(AvplayerUtils.playstate.playIndex<=0){
+       return;
+     }
       AvplayerUtils.avplayer.reset()
      let ind=--AvplayerUtils.playstate.playIndex
-     AvplayerUtils.avplayer.reset()
-     AvplayerUtils.playstate.img=songs[ind].img
-     AvplayerUtils.playstate.name=songs[ind].name
-     AvplayerUtils.playstate.url=songs[ind].url
-     AvplayerUtils.playstate.author=songs[ind].author
+     // AvplayerUtils.avplayer.reset()
+     // AvplayerUtils.playstate.img=songs[ind].img
+     // AvplayerUtils.playstate.name=songs[ind].name
+     // AvplayerUtils.playstate.url=songs[ind].url
+     // AvplayerUtils.playstate.author=songs[ind].author
+     AvplayerUtils.playstate.img=AvplayerUtils.playstate.playList[ind].img
+     AvplayerUtils.playstate.name=AvplayerUtils.playstate.playList[ind].name
+     AvplayerUtils.playstate.url=AvplayerUtils.playstate.playList[ind].url
+     AvplayerUtils.playstate.author=AvplayerUtils.playstate.playList[ind].author
      console.log('ken','状态上:'+AvplayerUtils.avplayer.state)
      AvplayerUtils.play()
      console.log('ken','状态下:'+AvplayerUtils.avplayer.state)
@@ -120,10 +153,14 @@ export class AvplayerUtils{
       }
      let ind=++AvplayerUtils.playstate.playIndex
      AvplayerUtils.avplayer.reset()
-     AvplayerUtils.playstate.img=songs[ind].img
-     AvplayerUtils.playstate.name=songs[ind].name
-     AvplayerUtils.playstate.url=songs[ind].url
-     AvplayerUtils.playstate.author=songs[ind].author
+     // AvplayerUtils.playstate.img=songs[ind].img
+     // AvplayerUtils.playstate.name=songs[ind].name
+     // AvplayerUtils.playstate.url=songs[ind].url
+     // AvplayerUtils.playstate.author=songs[ind].author
+     AvplayerUtils.playstate.img=AvplayerUtils.playstate.playList[ind].img
+     AvplayerUtils.playstate.name=AvplayerUtils.playstate.playList[ind].name
+     AvplayerUtils.playstate.url=AvplayerUtils.playstate.playList[ind].url
+     AvplayerUtils.playstate.author=AvplayerUtils.playstate.playList[ind].author
      console.log('ken','状态上:'+AvplayerUtils.avplayer.state)
      AvplayerUtils.play()
      console.log('ken','状态下:'+AvplayerUtils.avplayer.state)

@@ -107,39 +107,59 @@ import { AvplayerUtils } from '../utils/AvplayerUtils'
 import { emitter } from '@kit.BasicServicesKit'
 import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1, PlayState } from '../utils/common'
 
+
+//为什么一进入这个地方,数据一开始的显示不出来,可恶
 @Entry
 @Component
 struct Index {
   @State isone:boolean=true
   @State
-  playstate:PlayState= new PlayState()
+  playstate:PlayState=AvplayerUtils.playstate
   async aboutToAppear(): Promise<void> {
+    this.playstate=AvplayerUtils.playstate
+    //这个是播放数据的接收
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
       this.playstate=JSON.parse(d.mydata)
       console.log('ken','Index120具体播放界面的实现','现在数据'+JSON.stringify(d.mydata))
     })
-    AvplayerUtils.init()
+    await AvplayerUtils.init()
+    //这个是播放时长的接收,就是不知道能不能让它快点显示,最好不要播放了接收到,这个可能会涉及到预加载的内容
     emitter.on(playertunnel,(date:emitter.EventData)=>{
       let d=date.data as player_0
       this.playstate.duration=d.total
     })
+    //这个获取到是时间变化的时候进度条的实时变化
     emitter.on(playertunnel1,(date)=>{
       let d=date.data as player_1
       this.playstate.time=d.time
     })
+    //一进入页面直接播放,后面的代码直接粘贴到前面也不知道合不合适,能用就行
+    if(this.playstate.isPlay){
+      if(this.isone){
+        AvplayerUtils.play()
+        this.isone=false
+      }else{
+        AvplayerUtils.resume()
+      }
+    }else {
+      AvplayerUtils.pause()
+    }
+    this.playstate.isPlay=!this.playstate.isPlay
   }
   build() {
     Column() {
-      Stack(){
+      Stack({alignContent:Alignment.Center}){
         Image($r('app.media.ic_cd')).height(300).width(300).borderRadius(150)
+
         Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover)
-          .margin({top:150})
-      }.alignContent(Alignment.Center)
+
+      }
 
 
       Column(){
         Text(this.playstate.name).fontSize(22).fontWeight(FontWeight.Bold)
+          .margin({bottom:15})
         Text(this.playstate.author).fontSize(13)
       }.layoutWeight(1)
 
@@ -161,7 +181,7 @@ struct Index {
         Image($r('app.media.pre')).onClick((event: ClickEvent) => {
           this.isone=true
           AvplayerUtils.pre()
-        }).height(30).aspectRatio(1)
+        }).height(45).aspectRatio(1)
         Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
           if(this.playstate.isPlay){
             if(this.isone){
@@ -175,14 +195,15 @@ struct Index {
             AvplayerUtils.pause()
           }
           this.playstate.isPlay=!this.playstate.isPlay
-        }).height(30).aspectRatio(1)
+        }).height(45).aspectRatio(1)
         Image($r('app.media.next')).onClick((event: ClickEvent) => {
           this.isone=true
           AvplayerUtils.next()
-        }).height(30).aspectRatio(1)
+        }).height(45).aspectRatio(1)
 
       }.justifyContent(FlexAlign.SpaceAround)
       .width('100%')
+      .margin({bottom:20})
 
     }
     .height('100%')
