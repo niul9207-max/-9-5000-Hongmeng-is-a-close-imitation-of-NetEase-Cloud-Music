@@ -112,10 +112,19 @@ import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1
 @Entry
 @Component
 struct Index {
+  //背景颜色
+  @State topcolor:string=''
+  @State bottomcolor:string=''
+
   @State isone:boolean=true
   @State
   playstate:PlayState=AvplayerUtils.playstate
   async aboutToAppear(): Promise<void> {
+    //颜色操作
+    let s=await AvplayerUtils.updateBg(this.playstate.img)
+    this.topcolor=s[0]
+    this.bottomcolor=s[1]
+
     this.playstate=AvplayerUtils.playstate
     //这个是播放数据的接收
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
@@ -178,10 +187,15 @@ struct Index {
         Text(Math.floor((this.playstate.duration)/1000/60)+':'+Math.floor((this.playstate.duration)/1000%60))
       }
       Row(){
-        Image($r('app.media.pre')).onClick((event: ClickEvent) => {
+        Image($r('app.media.pre')).onClick(async (event: ClickEvent) => {
           this.isone=true
           AvplayerUtils.pre()
+
+          let s=await AvplayerUtils.updateBg(this.playstate.img)
+          this.topcolor=s[0]
+          this.bottomcolor=s[1]
         }).height(45).aspectRatio(1)
+          .fillColor(Color.White)
         Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
           if(this.playstate.isPlay){
             if(this.isone){
@@ -196,11 +210,16 @@ struct Index {
           }
           this.playstate.isPlay=!this.playstate.isPlay
         }).height(45).aspectRatio(1)
-        Image($r('app.media.next')).onClick((event: ClickEvent) => {
+          .fillColor(Color.White)
+        Image($r('app.media.next')).onClick(async (event: ClickEvent) => {
           this.isone=true
           AvplayerUtils.next()
-        }).height(45).aspectRatio(1)
 
+          let s=await AvplayerUtils.updateBg(this.playstate.img)
+          this.topcolor=s[0]
+          this.bottomcolor=s[1]
+        }).height(45).aspectRatio(1)
+          .fillColor(Color.White)
       }.justifyContent(FlexAlign.SpaceAround)
       .width('100%')
       .margin({bottom:20})
@@ -208,5 +227,11 @@ struct Index {
     }
     .height('100%')
     .width('100%')
+    .linearGradient(
+      {
+        direction:GradientDirection.Bottom,
+        colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
+      }
+    )
   }
 }

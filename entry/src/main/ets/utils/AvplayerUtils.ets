@@ -51,7 +51,7 @@ export class AvplayerUtils{
 
 
   //这个函数从网络上拷贝下来的
-  async updateBg(url: string): Promise<string[]> {
+  static async updateBg(url: string): Promise<string[]> {
     // 下载封面为二进制数据
     const res = await http.createHttp().request(url, { expectDataType: http.HttpDataType.ARRAY_BUFFER })
     // 二进制 → PixelMap(像素图,取色器的输入)
