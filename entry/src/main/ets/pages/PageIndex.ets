@@ -53,67 +53,73 @@ struct PageIndex {
   }
 
   build() {
-    Column() {
-      Tabs({barPosition:BarPosition.End,index:$$this.current}){
-        TabContent(){
-homeitem()
+    Stack({alignContent:Alignment.Bottom}){
+      Column() {
+        Tabs({barPosition:BarPosition.End,index:$$this.current}){
+          TabContent(){
+            homeitem()
 
-        }.tabBar(
-          this.bottomicon($r('app.media.bottom1'),'首页')
-        )
-        TabContent(){
-find()
+          }.tabBar(
+            this.bottomicon($r('app.media.bottom1'),'首页')
+          )
+          TabContent(){
+            find()
 
-        }.tabBar(
-          this.bottomicon($r('app.media.ic_find'),'发现')
-        )
-        TabContent(){
-         manyou()
+          }.tabBar(
+            this.bottomicon($r('app.media.ic_find'),'发现')
+          )
+          TabContent(){
+            manyou()
 
-        }.tabBar(
-          this.bottomicon($r('app.media.ic_logo'),'漫游')
-        )
-        TabContent(){
-          Dynamic()
-        }.tabBar(
-          this.bottomicon($r('app.media.ic_moment'),'动态')
-        )
-        TabContent(){
-          me()
-        }.tabBar(
-          this.bottomicon($r('app.media.ic_mine'),'我的')
-        )
+          }.tabBar(
+            this.bottomicon($r('app.media.ic_logo'),'漫游')
+          )
+          TabContent(){
+            Dynamic()
+          }.tabBar(
+            this.bottomicon($r('app.media.ic_moment'),'动态')
+          )
+          TabContent(){
+            me()
+          }.tabBar(
+            this.bottomicon($r('app.media.ic_mine'),'我的')
+          )
 
-      }.layoutWeight(1)
-      // Row(){
-      //   Image($r('app.media.pre')).onClick((event: ClickEvent) => {
-      //     this.isone=true
-      //     AvplayerUtils.pre()
-      //   }).height(30).aspectRatio(1)
-      //   Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
-      //     if(this.playstate.isPlay){
-      //       if(this.isone){
-      //         AvplayerUtils.play()
-      //         this.isone=false
-      //       }else{
-      //         AvplayerUtils.resume()
-      //       }
-      //
-      //     }else {
-      //       AvplayerUtils.pause()
-      //     }
-      //     this.playstate.isPlay=!this.playstate.isPlay
-      //   }).height(30).aspectRatio(1)
-      //   Image($r('app.media.next')).onClick((event: ClickEvent) => {
-      //     this.isone=true
-      //     AvplayerUtils.next()
-      //   }).height(30).aspectRatio(1)
-      //
-      // }.justifyContent(FlexAlign.SpaceAround)
-      // .width('100%')
+        }.layoutWeight(1)
+
+      }
+      .height('100%')
+      .width('100%')
+      Row(){
+        Image($r('app.media.pre')).onClick((event: ClickEvent) => {
+          this.isone=true
+          AvplayerUtils.pre()
+        }).height(30).aspectRatio(1)
+        Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
+          if(this.playstate.isPlay){
+            if(this.isone){
+              AvplayerUtils.play()
+              this.isone=false
+            }else{
+              AvplayerUtils.resume()
+            }
+
+          }else {
+            AvplayerUtils.pause()
+          }
+          this.playstate.isPlay=!this.playstate.isPlay
+        }).height(30).aspectRatio(1)
+        Image($r('app.media.next')).onClick((event: ClickEvent) => {
+          this.isone=true
+          AvplayerUtils.next()
+        }).height(30).aspectRatio(1)
+
+      }.justifyContent(FlexAlign.SpaceAround)
+      .width('100%')
+      .margin({bottom:60})
+      .backgroundColor('#1C1C21')
     }
-    .height('100%')
-    .width('100%')
+
   }
 }
 
