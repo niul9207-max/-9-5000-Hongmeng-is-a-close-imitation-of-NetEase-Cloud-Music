@@ -8,6 +8,7 @@ import {
 import { emitter } from '@kit.BasicServicesKit';
 import { dailyRecommend, momentList, recommendList, swiperList } from '../constant/MusicConstants';
 import { looperlist, MomentListType, RecommendDailyType, RecommendListType } from '../module/player';
+import { router, Router } from '@kit.ArkUI';
 
 
 @Entry
@@ -86,11 +87,12 @@ struct PageIndex {
           )
 
         }.layoutWeight(1)
+        .scrollable(false)
 
       }
       .height('100%')
       .width('100%')
-      Row(){
+      Row({space:20}){
         Image($r('app.media.pre')).onClick((event: ClickEvent) => {
           this.isone=true
           AvplayerUtils.pre()
@@ -114,10 +116,14 @@ struct PageIndex {
           AvplayerUtils.next()
         }).height(30).aspectRatio(1)
 
-      }.justifyContent(FlexAlign.SpaceAround)
+      }.justifyContent(FlexAlign.End).height(60).alignItems(VerticalAlign.Center)
       .width('100%')
       .margin({bottom:60})
       .backgroundColor('#1C1C21')
+      .padding({right:20})
+      .onClick(()=>{
+        router.pushUrl({ url:'pages/Index' })
+      })
     }
 
   }
@@ -445,7 +451,8 @@ struct manyou {
               .margin({left:20,bottom:10})
             }
           })
-        }
+        }.layoutWeight(1)
+        .padding({ bottom:60 })
       }.backgroundColor('#353333')
       .borderRadius({topLeft:20,topRight:20})
       .layoutWeight(1)
@@ -481,6 +488,7 @@ struct find {
           }
         })
       }.layoutWeight(1)
+      .padding({ bottom:60 })
     }.backgroundColor('#121215')
 
   }
@@ -545,5 +553,6 @@ struct Dynamic {
 
 
     }.backgroundColor('#121215')
+    .padding({ bottom:60 })
   }
 }
