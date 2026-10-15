@@ -113,19 +113,23 @@ import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1
 @Component
 struct Index {
   //背景颜色
+
   @State topcolor:string=''
   @State bottomcolor:string=''
 
   @State isone:boolean=true
   @State
   playstate:PlayState=AvplayerUtils.playstate
+
+
   async aboutToAppear(): Promise<void> {
     //颜色操作
     let s=await AvplayerUtils.updateBg(this.playstate.img)
     this.topcolor=s[0]
     this.bottomcolor=s[1]
+    // this.bottomcolor=AvplayerUtils.
 
-    this.playstate=AvplayerUtils.playstate
+    // this.playstate=AvplayerUtils.playstate
     //这个是播放数据的接收
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
@@ -189,13 +193,14 @@ struct Index {
       Row(){
         Image($r('app.media.pre')).onClick(async (event: ClickEvent) => {
           this.isone=true
-          AvplayerUtils.pre()
+          await AvplayerUtils.pre()
 
           let s=await AvplayerUtils.updateBg(this.playstate.img)
           this.topcolor=s[0]
           this.bottomcolor=s[1]
+
         }).height(45).aspectRatio(1)
-          .fillColor(Color.White)
+          // .fillColor(Color.White)
         Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
           if(this.playstate.isPlay){
             if(this.isone){
@@ -210,16 +215,17 @@ struct Index {
           }
           this.playstate.isPlay=!this.playstate.isPlay
         }).height(45).aspectRatio(1)
-          .fillColor(Color.White)
+          // .fillColor(Color.White)
         Image($r('app.media.next')).onClick(async (event: ClickEvent) => {
           this.isone=true
-          AvplayerUtils.next()
+          await AvplayerUtils.next()
 
-          let s=await AvplayerUtils.updateBg(this.playstate.img)
+          let s=await AvplayerUtils.updateBg(AvplayerUtils.playstate.img)
           this.topcolor=s[0]
           this.bottomcolor=s[1]
+
         }).height(45).aspectRatio(1)
-          .fillColor(Color.White)
+          // .fillColor(Color.White)
       }.justifyContent(FlexAlign.SpaceAround)
       .width('100%')
       .margin({bottom:20})

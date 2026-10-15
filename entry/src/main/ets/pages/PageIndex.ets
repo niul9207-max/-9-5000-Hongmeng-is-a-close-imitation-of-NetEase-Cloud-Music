@@ -95,12 +95,20 @@ struct PageIndex {
       .width('100%')
       Row({space:20}){
         Image(this.playstate.img).height(30).aspectRatio(1)
+          .margin({left:25})
+        Column(){
+          Text(this.playstate.name).fontColor(Color.White)
+          Text(this.playstate.author).fontColor(Color.White)
+        }.height('100%')
+        .alignItems(HorizontalAlign.Start)
+        .justifyContent(FlexAlign.Center)
         Blank()
         Row(){
           Image($r('app.media.pre')).onClick((event: ClickEvent) => {
             this.isone=true
             AvplayerUtils.pre()
           }).height(30).aspectRatio(1)
+
           Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
             if(this.playstate.isPlay){
               if(this.isone){
@@ -464,16 +472,18 @@ struct manyou {
               .onClick(()=>{
                 // ss.unshift(item)
                 console.log('ken','PageIndex466添加的数据',JSON.stringify(item))
+                let pos=AvplayerUtils.playstate.playList.length==0 ?0:AvplayerUtils.playstate.playIndex+1
                 ss.splice(AvplayerUtils.playstate.playIndex+1,0,item)
                 let s:PlayState= {
                   img: item.img,
                   name: item.name,
                   author: item.author,
                   url: item.url,
-                  playIndex: AvplayerUtils.playstate.playIndex+1,
+                  playIndex: pos,
+                  // playIndex: AvplayerUtils.playstate.playIndex+1,
                   time: 0,
                   duration: 0,
-                  isPlay: false,
+                  isPlay: true,
                   playMode: 'auto',
                   playList: ss
                 }

@@ -43,12 +43,26 @@ import { image } from "@kit.ImageKit"
 import { effectKit } from "@kit.ArkGraphics2D"
 import { http } from "@kit.NetworkKit"
 
+
+//整个playstate的母体就在这里,哎早知道就用Appstorage这个东西了,emitter一点都不方便,还容易搞混
+//一共三个地方有emit,嗯,现在我觉得可能没有真正的母体,因为有一个emit在PageIndex那个漫游的点击事件里面,还有就是在上一首下一首的函数里面,on倒是挺多,工具类,PageIndex,Index都注册了一个
 export class AvplayerUtils{
   static avplayer:media.AVPlayer=null!
   static playstate:PlayState=new PlayState()
   private constructor() {
   }
 
+  static toggle(){
+    if(AvplayerUtils.avplayer.state=="playing"){
+      AvplayerUtils.avplayer.pause()
+    }else {
+      AvplayerUtils.resume()
+    }
+    emitter.on(playertunnel2,(date:emitter.EventData)=>{
+      let d=date.data as players
+      AvplayerUtils.playstate=JSON.parse(d.mydata)
+    })
+  }
 
   //这个函数从网络上拷贝下来的
   static async updateBg(url: string): Promise<string[]> {
@@ -65,6 +79,14 @@ export class AvplayerUtils{
     // 底部用同一颜色压暗到 40%,形成上亮下暗的渐变
     return s
   }
+
+  // static async updateBg(pixelMap: image.PixelMap) {
+  //   const picker = await effectKit.createColorPicker(pixelMap) // 取色器:从图片提取颜色
+  //   const c = await picker.getMainColor() // 主色,含 red/green/blue(0~255)
+  //   return `rgb(${c.red},${c.green},${c.blue})`
+  // }
+
+
 
   //init函数主要就是建新的播放器对象还有,设置一些监听之类的
     static async init(){
@@ -124,11 +146,11 @@ export class AvplayerUtils{
    static pause(){
       AvplayerUtils.avplayer.pause()
    }
-   static pre(){
+   static async pre(){
      if(AvplayerUtils.playstate.playIndex<=0){
        return;
      }
-      AvplayerUtils.avplayer.reset()
+      await AvplayerUtils.avplayer.reset()
      let ind=--AvplayerUtils.playstate.playIndex
      // AvplayerUtils.avplayer.reset()
      // AvplayerUtils.playstate.img=songs[ind].img
@@ -147,12 +169,12 @@ export class AvplayerUtils{
      }})
 
    }
-   static  next(){
+   static async next(){
       if(AvplayerUtils.playstate.playIndex>=AvplayerUtils.playstate.playList.length-1){
         return;
       }
      let ind=++AvplayerUtils.playstate.playIndex
-     AvplayerUtils.avplayer.reset()
+     await AvplayerUtils.avplayer.reset()
      // AvplayerUtils.playstate.img=songs[ind].img
      // AvplayerUtils.playstate.name=songs[ind].name
      // AvplayerUtils.playstate.url=songs[ind].url
