@@ -42,6 +42,7 @@ import { players, playertunnel, playertunnel1, playertunnel2, PlayState, SongIte
 import { image } from "@kit.ImageKit"
 import { effectKit } from "@kit.ArkGraphics2D"
 import { http } from "@kit.NetworkKit"
+import { ss } from "../constant/data"
 
 
 //整个playstate的母体就在这里,哎早知道就用Appstorage这个东西了,emitter一点都不方便,还容易搞混
@@ -100,7 +101,7 @@ export class AvplayerUtils{
     static async init(){
     if(AvplayerUtils.avplayer)return
     AvplayerUtils.avplayer=await  media.createAVPlayer()
-      AvplayerUtils.avplayer.on('stateChange',(state)=>{
+      AvplayerUtils.avplayer.on('stateChange', async (state)=>{
         switch (state){
           case 'initialized':{
             AvplayerUtils.avplayer.prepare()
@@ -110,10 +111,38 @@ export class AvplayerUtils{
             AvplayerUtils.playstate.duration=AvplayerUtils.avplayer.duration
             emitter.emit(playertunnel, { data:{'total':AvplayerUtils.avplayer.duration} })
             AvplayerUtils.avplayer.play()
+            break
           }
           // 暂时不需要管播放模式的问题,直接默认顺序播放就行
-          case 'stopped':{
+          case 'completed':{
+            let mode=AppStorage.get<number>('mode')
+            if(mode==0){
+              AvplayerUtils.next()
+            console.log('ken1','这个时候状态是','顺序',mode)
+            }else if(mode==2){
+              // await AvplayerUtils.avplayer.prepare()
+              AvplayerUtils.avplayer.play()
+              console.log('ken1','这个时候状态是','单例')
 
+            }else {
+              console.log('ken1','这个时候状态是','随机')
+              let ind=Math.floor(Math.random()*10000%AvplayerUtils.playstate.playList.length)
+              // let ind=++AvplayerUtils.playstate.playIndex
+              await AvplayerUtils.avplayer.reset()
+              AvplayerUtils.playstate.img=AvplayerUtils.playstate.playList[ind].img
+              AvplayerUtils.playstate.name=AvplayerUtils.playstate.playList[ind].name
+              AvplayerUtils.playstate.url=AvplayerUtils.playstate.playList[ind].url
+              AvplayerUtils.playstate.author=AvplayerUtils.playstate.playList[ind].author
+              AvplayerUtils.playstate.isPlay=false
+              AvplayerUtils.playstate.time=0
+              AvplayerUtils.playstate.duration=0
+              console.log('ken','状态上:'+AvplayerUtils.avplayer.state)
+              AvplayerUtils.play()
+              console.log('ken','状态下:'+AvplayerUtils.avplayer.state)
+              emitter.emit(playertunnel2,{data:{
+                'mydata':JSON.stringify(AvplayerUtils.playstate)
+              }})
+            }
           }
 
 
@@ -235,5 +264,46 @@ export class AvplayerUtils{
     emitter.emit(playertunnel2,{data:{
       'mydata':JSON.stringify(AvplayerUtils.playstate)
     }})
+  }
+
+//很简单,找到音乐并播放,就是togglemusic和next的结合版,由于只是复用代码,加上我稍微改了一下,我可能也不是很清楚一些东西
+  static async findmusic_play(sss:SongItemType){
+    let ind=AvplayerUtils.playstate.playList.findIndex((item:SongItemType)=>{return item.name==sss.name})
+    if(ind>=0){
+      await AvplayerUtils.avplayer.reset()
+      AvplayerUtils.playstate.img=AvplayerUtils.playstate.playList[ind].img
+      AvplayerUtils.playstate.name=AvplayerUtils.playstate.playList[ind].name
+      AvplayerUtils.playstate.url=AvplayerUtils.playstate.playList[ind].url
+      AvplayerUtils.playstate.author=AvplayerUtils.playstate.playList[ind].author
+      AvplayerUtils.playstate.playIndex=ind
+      AvplayerUtils.playstate.isPlay=false
+      AvplayerUtils.playstate.time=0
+      AvplayerUtils.playstate.duration=0
+      AvplayerUtils.play()
+      emitter.emit(playertunnel2,{data:{
+        'mydata':JSON.stringify(AvplayerUtils.playstate)
+      }})
+    }else {
+      let item=sss
+      let pos=AvplayerUtils.playstate.playList.length==0 ?0:AvplayerUtils.playstate.playIndex+1
+      ss.splice(AvplayerUtils.playstate.playIndex+1,0,item)
+      let s:PlayState= {
+        img: item.img,
+        name: item.name,
+        author: item.author,
+        url: item.url,
+        playIndex: pos,
+        // playIndex: AvplayerUtils.playstate.playIndex+1,
+        time: 0,
+        duration: 0,
+        isPlay: true,
+        playMode: 'auto',
+        playList: ss
+      }
+      emitter.emit(playertunnel2,{data:{
+        'mydata':JSON.stringify(s)
+      }})
+    }
+
   }
  }

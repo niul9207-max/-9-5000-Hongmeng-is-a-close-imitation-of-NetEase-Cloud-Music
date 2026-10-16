@@ -16,6 +16,7 @@ import { when } from '@ohos/hypium';
 @Entry
 @Component
 struct PageIndex {
+  @State issearch:boolean=false
 
   //没什么卵用的吉祥物
   @State message: string = 'Hello World';
@@ -50,6 +51,8 @@ struct PageIndex {
   //千算万算没算到init是异步的所以这个赋值会直接错过去,要么就等,用emitter传值我没试过,刚写好没试过,等会试试
   //这个地方主要是订阅和工具类里面的初始化的设置,比如播放器
   async aboutToAppear(): Promise<void> {
+    this.getUIContext().showAlertDialog({message:'都说是正经软件还不信'})
+
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
       this.playstate=JSON.parse(d.mydata)
@@ -79,7 +82,7 @@ struct PageIndex {
       Column() {
         Tabs({barPosition:BarPosition.End,index:$$this.current}){
           TabContent(){
-            homeitem()
+            homeitem({issearch:this.issearch})
 
           }.tabBar(
             this.bottomicon($r("app.media.ic_recommend"),'首页',0)
@@ -320,16 +323,80 @@ struct me {
 //首页界面
 @Component
 struct homeitem {
+  @Prop issearch:boolean
+  @State s:SongItemType[]=[]
+  @State search:string=''
   build() {
+
     //扯淡,这里要准备三个页面,吐了
-    Stack(){
-      List(){
-        ListItem(){
-          TextInput({placeholder:'No.9'})
-        }.width('90%')
-        .borderRadius(20)
-        .margin({top:10,bottom:10})
+    //四个怎么分,搜索最大,背景和列表同级别,但是列表要在上面,他们中间,而且随时可以消失,原来的内容最小
+    //搜索功能里面的点击播放暂时不写
+    Stack({alignContent:Alignment.Top}){
+      TextInput({placeholder:'No.9',text:$$this.search})
+        .zIndex(100)
+        .width('100%')
+        .height(40)
         .backgroundColor(Color.White)
+        .margin({top:10})
+        .onClick(()=>{this.issearch=true})
+        .onChange(()=>{
+          //这个过滤函数是直接从网络上面获取的
+
+          let k: string = this.search.toLowerCase()  // 转小写,让英文不区分大小写
+          // 歌名或歌手包含关键字就保留;关键字为空时 includes('') 恒为 true,等于显示全部
+          this.s = songs.filter((s: SongItemType) =>
+          s.name.toLowerCase().includes(k) || s.author.toLowerCase().includes(k))
+
+        })
+
+      if (this.issearch){
+        Column()
+          .width('100%')
+          .height('100%')
+          .zIndex(99)
+          .backgroundColor(Color.White)
+          .onClick(()=>{
+            this.issearch=false
+          })
+        List(){
+          ForEach(this.s,(item:SongItemType,index:number)=>{
+            ListItem(){
+              Row(){
+                Text((index+1).toString())
+                  .margin({right:20})
+                  .fontColor(index==0?'#FFE426':index==1?'#EC6C87':index==2?'#3D5C63':'#A49A9A')
+                  .fontWeight(FontWeight.Bold)
+                Image(item.img).height(45).aspectRatio(1)
+                  .borderRadius(5)
+                Column(){
+                  Text(item.name).alignSelf(ItemAlign.Start)
+                  Text(item.author).alignSelf(ItemAlign.Start)
+                }.margin({left:10})
+              }.borderRadius(20)
+              .onClick(()=>{
+                AvplayerUtils.findmusic_play(item)
+              })
+              .margin({left:20,bottom:10})
+            }
+          })
+        }.layoutWeight(1)
+        .padding({ bottom:60 })
+        .zIndex(100)
+        .margin({top:80})
+      }
+
+
+      List(){
+        // ListItem(){
+        //
+        // }.width('90%')
+        // .borderRadius(20)
+        // .margin({top:10,bottom:10})
+        // .backgroundColor(Color.White)
+        // .onClick(()=>{
+        //   this.issearch=true
+        //
+        // })
         ListItem(){
 
           Swiper(){
@@ -420,7 +487,8 @@ struct homeitem {
       .width('100%')
       .alignListItem(ListItemAlign.Center)
       .backgroundColor('#111113')
-    }
+      .margin({top:60})
+    }.backgroundColor(Color.Black)
 
   }
 }

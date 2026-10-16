@@ -116,8 +116,8 @@ import { when } from '@ohos/hypium'
 struct Index {
   //背景颜色
 //两个是为了搞渐变色的,但是渐变色的颜色获取是异步函数有点难调,我调不好,先放着
-  @State topcolor:string=''
-  @State bottomcolor:string=''
+  @State topcolor:string='#1C1C21'
+  @State bottomcolor:string='#121215'
 
   //没什么卵用,可以退休了
   @State isone:boolean=true
@@ -132,6 +132,25 @@ struct Index {
   //这个是看音乐列表的核心判断变量
   @State showlist:boolean=false
 
+  private lastBgUrl:string=''        // 记住"我现在关心哪张封面"
+
+  //这个是抄ai的
+  private async refreshBg(url:string){
+    if(!url) return
+    if(url === this.lastBgUrl) return          // 同一张封面，跳过（播放/暂停会反复触发这里）
+    this.lastBgUrl = url                       // 先标记：我现在要的是这张
+
+    try{
+      let s = await AvplayerUtils.updateBg(url)
+      if(url !== this.lastBgUrl) return        // 算完发现已经换歌了 → 结果作废
+      this.topcolor = s[0]
+      this.bottomcolor = s[1]
+    }catch(e){
+      this.lastBgUrl = ''                      // 失败了，允许下次重试
+      console.log('ken','取色失败:',JSON.stringify(e))
+    }
+  }
+
   //这个主要是管订阅--包括核心数据,进度条数据,还有工具类的初始化,还有一进来的一些准备,比如一进来就要播放,不要让用户重复点击
   async aboutToAppear(): Promise<void> {
     //颜色操作
@@ -145,9 +164,11 @@ struct Index {
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
       this.playstate=JSON.parse(d.mydata)
+      this.refreshBg(this.playstate.img)
       console.log('ken','Index120具体播放界面的实现','现在数据'+JSON.stringify(d.mydata))
     })
     await AvplayerUtils.init()
+    await this.refreshBg(this.playstate.img)
     //这个是播放时长的接收,就是不知道能不能让它快点显示,最好不要播放了接收到,这个可能会涉及到预加载的内容
     emitter.on(playertunnel,(date:emitter.EventData)=>{
       //原来的,不删好回滚
@@ -181,20 +202,18 @@ struct Index {
   build() {
     //这个是为了层叠空间让音乐列表生效
     Stack({alignContent:Alignment.Bottom}){
-
       //播放器本体
       Column() {
         Stack({alignContent:Alignment.Top}){
           Image($r('app.media.ic_stylus')).width(150)
           // .position({x:100})
-            .rotate({angle:this.playstate.isPlay?-70:-45,centerX:'50%',centerY:'5%'})
+            .rotate({angle:this.playstate.isPlay?-60:-45,centerX:'50%',centerY:'5%'})
             .animation({duration:600,curve:Curve.EaseInOut})
             .zIndex(100)
           Stack({alignContent:Alignment.Center}){
             Image($r('app.media.ic_cd')).height(300).width(300).borderRadius(150)
-
             Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover)
-
+              // .rotate()
           }.margin({top:50})
           // .margin({top:40})
         }
@@ -206,11 +225,11 @@ struct Index {
             .margin({bottom:15})
           Text(this.playstate.author).fontSize(13)
         }.layoutWeight(1)
-
         .justifyContent(FlexAlign.Center)
 
         Row(){
           Text(Math.floor((this.playstate.time)/1000/60)+':'+Math.floor((this.playstate.time)/1000%60))
+            .fontColor(Color.White)
           Slider({
             min:0,
             max:this.playstate.duration,
@@ -219,7 +238,11 @@ struct Index {
             this.playstate.time=val
             AvplayerUtils.avplayer.seek(val)
           }).layoutWeight(1)
+            .selectedColor(Color.White)
+            .trackColor('#A6A6A6')
+
           Text(Math.floor((this.playstate.duration)/1000/60)+':'+Math.floor((this.playstate.duration)/1000%60))
+            .fontColor(Color.White)
         }
         Row(){
           Image(this.mode==1?$r('app.media.ic_auto'): this.mode==2?$r('app.media.ic_repeat'):$r('app.media.ic_random')).onClick(async (event: ClickEvent) => {
@@ -229,17 +252,18 @@ struct Index {
 
           }).height(45).aspectRatio(1)
 
-          Image($r('app.media.pre')).onClick(async (event: ClickEvent) => {
+          Image($r('app.media.pre'))
+            .fillColor(Color.White)
+            .onClick(async (event: ClickEvent) => {
             this.isone=true
             await AvplayerUtils.pre()
 
-            let s=await AvplayerUtils.updateBg(this.playstate.img)
-            this.topcolor=s[0]
-            this.bottomcolor=s[1]
 
           }).height(45).aspectRatio(1)
           // .fillColor(Color.White)
-          Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
+          Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend'))
+            .fillColor(Color.White)
+            .onClick((event: ClickEvent) => {
 
             //方案1--全靠本地来控制,但是这个思维不灵活的人不要轻易尝试,很容易搞混,比如我
             // if(this.playstate.isPlay){
@@ -259,13 +283,13 @@ struct Index {
             this.playstate.isPlay=AvplayerUtils.playstate.isPlay
           }).height(45).aspectRatio(1)
           // .fillColor(Color.White)
-          Image($r('app.media.next')).onClick(async (event: ClickEvent) => {
+          Image($r('app.media.next'))
+            .fillColor(Color.White)
+            .onClick(async (event: ClickEvent) => {
             this.isone=true
             await AvplayerUtils.next()
 
-            let s=await AvplayerUtils.updateBg(AvplayerUtils.playstate.img)
-            this.topcolor=s[0]
-            this.bottomcolor=s[1]
+
 
           }).height(45).aspectRatio(1)
           // .fillColor(Color.White)
@@ -287,12 +311,12 @@ struct Index {
         this.showlist=false
       })
       //暂时不想去碰的没什么卵用的注释--渐变色
-      // .linearGradient(
-      //   {
-      //     direction:GradientDirection.Bottom,
-      //     colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
-      //   }
-      // )
+      .linearGradient(
+        {
+          direction:GradientDirection.Bottom,
+          colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
+        }
+      )
 
       //音乐列表本地
       if(this.showlist){
@@ -333,7 +357,7 @@ struct Index {
               }.height(55)
 
             })
-          }
+          }.layoutWeight(1)
 
         }.backgroundColor('#353333')
         .borderRadius({topLeft:10,topRight:10})
