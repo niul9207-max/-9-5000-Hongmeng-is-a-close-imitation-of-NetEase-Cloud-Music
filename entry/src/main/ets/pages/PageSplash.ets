@@ -3,7 +3,11 @@ import { router } from '@kit.ArkUI';
 @Entry
 @Component
 struct PageSplash {
-  @State message: string = 'Hello World';
+  @State message: string[] = ['v我100即刻跳转\n' +
+    '我们是正经软件哦','v我100就不跑', '手速不行啊', '正经软件不会让你抓到','滚'];
+  @State offentx:number=0
+  @State offenty:number=0
+  @State trycount:number=0
   aboutToAppear(): void {
     // setTimeout(()=>{
     //   router.replace({url:'pages/PageIndex'})
@@ -18,10 +22,22 @@ struct PageSplash {
           .height('100%')
         Button('v我100即刻跳转\n' +
           '我们是正经软件哦')
-          // .height(50)
-          .onClick(()=>{
-            router.replace({url:'pages/PageIndex'})
-          })
+          .height(50)
+        // Button(this.message[this.trycount])
+        //   .translate({x:this.offentx,y:this.offenty})
+        //   .onClick(()=>{
+        //     if(this.trycount<4){
+        //       animateTo({duration:300},()=>{
+        //         this.offentx=-Math.random()*250
+        //         this.offenty=Math.random()*400
+        //       })
+        //       this.trycount++
+        //     }else
+        //     router.replace({url:'pages/PageIndex'})
+        //   })
+            .onClick(()=>{
+              router.replace({url:'pages/PageIndex'})
+            })
           .margin({top:40,right:30})
           .labelStyle({maxLines:2})
 

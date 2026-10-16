@@ -51,7 +51,7 @@ struct PageIndex {
   //千算万算没算到init是异步的所以这个赋值会直接错过去,要么就等,用emitter传值我没试过,刚写好没试过,等会试试
   //这个地方主要是订阅和工具类里面的初始化的设置,比如播放器
   async aboutToAppear(): Promise<void> {
-    this.getUIContext().showAlertDialog({message:'都说是正经软件还不信'})
+    this.getUIContext().showAlertDialog({message:'都说是正经软件还不信,虚拟产品,不支持退款'})
 
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
