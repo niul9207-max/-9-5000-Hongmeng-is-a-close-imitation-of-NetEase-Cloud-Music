@@ -105,7 +105,9 @@
 
 import { AvplayerUtils } from '../utils/AvplayerUtils'
 import { emitter } from '@kit.BasicServicesKit'
-import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1, PlayState } from '../utils/common'
+import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1, PlayState,
+  SongItemType } from '../utils/common'
+import { when } from '@ohos/hypium'
 
 
 //为什么一进入这个地方,数据一开始的显示不出来,可恶
@@ -113,20 +115,29 @@ import { players, playertunnel, playertunnel1, playertunnel2, player_0, player_1
 @Component
 struct Index {
   //背景颜色
-
+//两个是为了搞渐变色的,但是渐变色的颜色获取是异步函数有点难调,我调不好,先放着
   @State topcolor:string=''
   @State bottomcolor:string=''
 
+  //没什么卵用,可以退休了
   @State isone:boolean=true
+
+  //这个页面的核心数据,wcv好想死,早知道写之前先去问一下ai了
   @State
   playstate:PlayState=AvplayerUtils.playstate
 
+  //mode切换的核心变量,当然本地在appstroage那里
+  @StorageLink('mode') mode:number=0
 
+  //这个是看音乐列表的核心判断变量
+  @State showlist:boolean=false
+
+  //这个主要是管订阅--包括核心数据,进度条数据,还有工具类的初始化,还有一进来的一些准备,比如一进来就要播放,不要让用户重复点击
   async aboutToAppear(): Promise<void> {
     //颜色操作
-    let s=await AvplayerUtils.updateBg(this.playstate.img)
-    this.topcolor=s[0]
-    this.bottomcolor=s[1]
+    // let s=await AvplayerUtils.updateBg(this.playstate.img)
+    // this.topcolor=s[0]
+    // this.bottomcolor=s[1]
     // this.bottomcolor=AvplayerUtils.
 
     // this.playstate=AvplayerUtils.playstate
@@ -139,13 +150,19 @@ struct Index {
     await AvplayerUtils.init()
     //这个是播放时长的接收,就是不知道能不能让它快点显示,最好不要播放了接收到,这个可能会涉及到预加载的内容
     emitter.on(playertunnel,(date:emitter.EventData)=>{
-      let d=date.data as player_0
-      this.playstate.duration=d.total
+      //原来的,不删好回滚
+      // let d=date.data as player_0
+      // this.playstate.duration=d.total
+
+      //由于duration不是对象,只是一层嵌套所以可以实时同步ui
+      this.playstate.duration=AvplayerUtils.playstate.duration
     })
     //这个获取到是时间变化的时候进度条的实时变化
     emitter.on(playertunnel1,(date)=>{
-      let d=date.data as player_1
-      this.playstate.time=d.time
+      // let d=date.data as player_1
+      // this.playstate.time=d.time
+
+      this.playstate.time=AvplayerUtils.playstate.time
     })
     //一进入页面直接播放,后面的代码直接粘贴到前面也不知道合不合适,能用就行
     if(this.playstate.isPlay){
@@ -160,84 +177,173 @@ struct Index {
     }
     this.playstate.isPlay=!this.playstate.isPlay
   }
+
   build() {
-    Column() {
-      Stack({alignContent:Alignment.Center}){
-        Image($r('app.media.ic_cd')).height(300).width(300).borderRadius(150)
+    //这个是为了层叠空间让音乐列表生效
+    Stack({alignContent:Alignment.Bottom}){
 
-        Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover)
+      //播放器本体
+      Column() {
+        Stack({alignContent:Alignment.Top}){
+          Image($r('app.media.ic_stylus')).width(150)
+          // .position({x:100})
+            .rotate({angle:this.playstate.isPlay?-70:-45,centerX:'50%',centerY:'5%'})
+            .animation({duration:600,curve:Curve.EaseInOut})
+            .zIndex(100)
+          Stack({alignContent:Alignment.Center}){
+            Image($r('app.media.ic_cd')).height(300).width(300).borderRadius(150)
 
-      }
+            Image(this.playstate.img).height(200).width(200).borderRadius(100).objectFit(ImageFit.Cover)
+
+          }.margin({top:50})
+          // .margin({top:40})
+        }
 
 
-      Column(){
-        Text(this.playstate.name).fontSize(22).fontWeight(FontWeight.Bold)
-          .margin({bottom:15})
-        Text(this.playstate.author).fontSize(13)
-      }.layoutWeight(1)
 
-      .justifyContent(FlexAlign.Center)
+        Column(){
+          Text(this.playstate.name).fontSize(22).fontWeight(FontWeight.Bold)
+            .margin({bottom:15})
+          Text(this.playstate.author).fontSize(13)
+        }.layoutWeight(1)
 
-      Row(){
-        Text(Math.floor((this.playstate.time)/1000/60)+':'+Math.floor((this.playstate.time)/1000%60))
-        Slider({
-          min:0,
-          max:this.playstate.duration,
-          value:this.playstate.time
-        }).onChange((val)=>{
-          this.playstate.time=val
-          AvplayerUtils.avplayer.seek(val)
-        }).layoutWeight(1)
-        Text(Math.floor((this.playstate.duration)/1000/60)+':'+Math.floor((this.playstate.duration)/1000%60))
-      }
-      Row(){
-        Image($r('app.media.pre')).onClick(async (event: ClickEvent) => {
-          this.isone=true
-          await AvplayerUtils.pre()
+        .justifyContent(FlexAlign.Center)
 
-          let s=await AvplayerUtils.updateBg(this.playstate.img)
-          this.topcolor=s[0]
-          this.bottomcolor=s[1]
+        Row(){
+          Text(Math.floor((this.playstate.time)/1000/60)+':'+Math.floor((this.playstate.time)/1000%60))
+          Slider({
+            min:0,
+            max:this.playstate.duration,
+            value:this.playstate.time
+          }).onChange((val)=>{
+            this.playstate.time=val
+            AvplayerUtils.avplayer.seek(val)
+          }).layoutWeight(1)
+          Text(Math.floor((this.playstate.duration)/1000/60)+':'+Math.floor((this.playstate.duration)/1000%60))
+        }
+        Row(){
+          Image(this.mode==1?$r('app.media.ic_auto'): this.mode==2?$r('app.media.ic_repeat'):$r('app.media.ic_random')).onClick(async (event: ClickEvent) => {
+            if(this.mode==3){
+              this.mode=1
+            }else this.mode++
 
-        }).height(45).aspectRatio(1)
+          }).height(45).aspectRatio(1)
+
+          Image($r('app.media.pre')).onClick(async (event: ClickEvent) => {
+            this.isone=true
+            await AvplayerUtils.pre()
+
+            let s=await AvplayerUtils.updateBg(this.playstate.img)
+            this.topcolor=s[0]
+            this.bottomcolor=s[1]
+
+          }).height(45).aspectRatio(1)
           // .fillColor(Color.White)
-        Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
-          if(this.playstate.isPlay){
-            if(this.isone){
-              AvplayerUtils.play()
-              this.isone=false
-            }else{
-              AvplayerUtils.resume()
+          Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
+
+            //方案1--全靠本地来控制,但是这个思维不灵活的人不要轻易尝试,很容易搞混,比如我
+            // if(this.playstate.isPlay){
+            //   if(this.isone){
+            //     AvplayerUtils.play()
+            //     this.isone=false
+            //   }else{
+            //     AvplayerUtils.resume()
+            //   }
+            //
+            // }else {
+            //   AvplayerUtils.pause()
+            // }
+
+            //方案二加入了图片是否在播放还是由本地的元素决定,但是本地的元素和静态类里面的高度绑定,静态类里面的状态是由真实的数据决定了,链条清晰
+            AvplayerUtils.toggle()
+            this.playstate.isPlay=AvplayerUtils.playstate.isPlay
+          }).height(45).aspectRatio(1)
+          // .fillColor(Color.White)
+          Image($r('app.media.next')).onClick(async (event: ClickEvent) => {
+            this.isone=true
+            await AvplayerUtils.next()
+
+            let s=await AvplayerUtils.updateBg(AvplayerUtils.playstate.img)
+            this.topcolor=s[0]
+            this.bottomcolor=s[1]
+
+          }).height(45).aspectRatio(1)
+          // .fillColor(Color.White)
+          Image($r('app.media.ic_song_list')).onClick(async (event: ClickEvent) => {
+            if(AvplayerUtils.playstate.playList){
+              this.showlist=true
             }
 
-          }else {
-            AvplayerUtils.pause()
-          }
-          this.playstate.isPlay=!this.playstate.isPlay
-        }).height(45).aspectRatio(1)
-          // .fillColor(Color.White)
-        Image($r('app.media.next')).onClick(async (event: ClickEvent) => {
-          this.isone=true
-          await AvplayerUtils.next()
+          }).height(45).aspectRatio(1)
+        }.justifyContent(FlexAlign.SpaceAround)
+        .width('100%')
+        .margin({bottom:20})
 
-          let s=await AvplayerUtils.updateBg(AvplayerUtils.playstate.img)
-          this.topcolor=s[0]
-          this.bottomcolor=s[1]
-
-        }).height(45).aspectRatio(1)
-          // .fillColor(Color.White)
-      }.justifyContent(FlexAlign.SpaceAround)
-      .width('100%')
-      .margin({bottom:20})
-
-    }
-    .height('100%')
-    .width('100%')
-    .linearGradient(
-      {
-        direction:GradientDirection.Bottom,
-        colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
       }
-    )
+      .height('100%')
+      .width('100%')
+      .onClick(()=>{
+        //这个就是点击其他地方让列表消失的关键,层叠布局好啊,要学
+        this.showlist=false
+      })
+      //暂时不想去碰的没什么卵用的注释--渐变色
+      // .linearGradient(
+      //   {
+      //     direction:GradientDirection.Bottom,
+      //     colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
+      //   }
+      // )
+
+      //音乐列表本地
+      if(this.showlist){
+        Column(){
+          Text('播放列表('+this.playstate.playList.length+')')
+            .margin({left:20,top:20,bottom:20})
+
+          Divider().color(Color.White)
+          List(){
+            ForEach(this.playstate.playList,(item:SongItemType,i:number)=>{
+              ListItem(){
+                Column(){
+                  Row(){
+                    Text((i+1).toString()).alignSelf(ItemAlign.Center)
+                      .margin({right:10,left:20})
+                      .fontColor('#9A9191')
+                    Column(){
+                      Text(item.name).fontColor(item.name==this.playstate.name?'#EC6C87':'#9A9191')
+                        .fontSize(16)
+
+                      Text(item.author).fontColor(item.name==this.playstate.name?'#EC6C87':'#9A9191')
+                        .fontSize(13)
+                    }.height('100%')
+                    .justifyContent(FlexAlign.Center)
+                    .alignItems(HorizontalAlign.Start)
+
+                  }.justifyContent(FlexAlign.Start)
+                  Divider().color(Color.White)
+                }.width('100%')
+                .alignItems(HorizontalAlign.Start)
+                .onClick(()=>{
+                  AvplayerUtils.togglemusic(item)
+                })
+                //没做点击切换:纯懒,索引不好找,当然可以找,而且要通知全部的数据更新,或许这个应该要在工具类里面写一个方法
+
+
+
+              }.height(55)
+
+            })
+          }
+
+        }.backgroundColor('#353333')
+        .borderRadius({topLeft:10,topRight:10})
+        .height('50%')
+        .width('100%')
+      }
+    }
+
+
   }
 }
+
+

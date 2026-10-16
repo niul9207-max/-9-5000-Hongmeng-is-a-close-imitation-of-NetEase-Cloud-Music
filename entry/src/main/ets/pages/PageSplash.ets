@@ -13,6 +13,7 @@ struct PageSplash {
   build() {
     Column() {
       Text('欢迎关岭')
+      //不知道为什么显示出来很丑
       Text('/**\n' +
         ' *                             _ooOoo_\n' +
         ' *                            o8888888o\n' +

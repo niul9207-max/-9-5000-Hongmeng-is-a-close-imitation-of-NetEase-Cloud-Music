@@ -10,30 +10,45 @@ import { dailyRecommend, momentList, recommendList, swiperList } from '../consta
 import { looperlist, MomentListType, RecommendDailyType, RecommendListType } from '../module/player';
 import { router, Router } from '@kit.ArkUI';
 import { ss } from '../constant/data';
+import { when } from '@ohos/hypium';
 
 
 @Entry
 @Component
 struct PageIndex {
+
+  //没什么卵用的吉祥物
   @State message: string = 'Hello World';
+
+  //当前索引,来用在我的页面格局下面的小播放器的
   @State current:number=0
+
+  //tarbar组件的ui
   @Builder
-  bottomicon(image:Resource,tabname:string){
+  bottomicon(image:Resource,tabname:string,index:number){
     Column(){
-      // Image($r('app.media.bottom1')).height(20).aspectRatio(1)
+      // #EC6C87
+      // Image($r('app.media.bottom1')).height(20).asptgectRatio(1)
       Image(image).height(20).aspectRatio(1)
+        .fillColor(this.current==index?'#EC6C87':'#E6E6E6')
       Text(tabname)
+        .fontColor(this.current==index?'#EC6C87':'#E6E6E6')
     }
 
   }
+
+  //没什么卵用,已经退休了
   @State isone:boolean=true
   // @State isplayer:boolean=true
   //   @State total:number=0
   //   @State time:number=0
+
+  //这个是这个界面维持的核心数据需要订阅之后不断更新,恶心死了,下次一定用appstorage
   @State
   playstate:PlayState= new PlayState()
 
   //千算万算没算到init是异步的所以这个赋值会直接错过去,要么就等,用emitter传值我没试过,刚写好没试过,等会试试
+  //这个地方主要是订阅和工具类里面的初始化的设置,比如播放器
   async aboutToAppear(): Promise<void> {
     emitter.on(playertunnel2,(date:emitter.EventData)=>{
       let d=date.data as players
@@ -44,17 +59,22 @@ struct PageIndex {
     // this.playstate=AvplayerUtils.playstate
     // console.log('ken',JSON.stringify(this.playstate))
 
-    emitter.on(playertunnel,(date:emitter.EventData)=>{
-      let d=date.data as player_0
-      this.playstate.duration=d.total
-    })
-    emitter.on(playertunnel1,(date)=>{
-      let d=date.data as player_1
-      this.playstate.time=d.time
-    })
+
+    //粘贴过来的,没有实际意义
+    // emitter.on(playertunnel,(date:emitter.EventData)=>{
+    //   let d=date.data as player_0
+    //   this.playstate.duration=d.total
+    // })
+    // emitter.on(playertunnel1,(date)=>{
+    //   let d=date.data as player_1
+    //   this.playstate.time=d.time
+    // })
   }
 
+  //主要ui界面
   build() {
+
+    //这个层叠布局主要是用来放小播放器的
     Stack({alignContent:Alignment.Bottom}){
       Column() {
         Tabs({barPosition:BarPosition.End,index:$$this.current}){
@@ -62,86 +82,100 @@ struct PageIndex {
             homeitem()
 
           }.tabBar(
-            this.bottomicon($r('app.media.bottom1'),'首页')
+            this.bottomicon($r("app.media.ic_recommend"),'首页',0)
           )
           TabContent(){
             find()
 
           }.tabBar(
-            this.bottomicon($r('app.media.ic_find'),'发现')
+            this.bottomicon($r('app.media.ic_find'),'发现',1)
           )
           TabContent(){
             manyou()
 
           }.tabBar(
-            this.bottomicon($r('app.media.ic_logo'),'漫游')
+            this.bottomicon($r("app.media.ic_logo"),'漫游',2)
           )
           TabContent(){
             Dynamic()
           }.tabBar(
-            this.bottomicon($r('app.media.ic_moment'),'动态')
+            this.bottomicon($r('app.media.ic_moment'),'动态',3)
           )
           TabContent(){
             me()
           }.tabBar(
-            this.bottomicon($r('app.media.ic_mine'),'我的')
+            this.bottomicon($r('app.media.ic_mine'),'我的',4)
           )
 
         }.layoutWeight(1)
         .scrollable(false)
+        .onChange((item:number)=>{
+          this.current=item
+        })
 
       }
       .height('100%')
       .width('100%')
-      Row({space:20}){
-        Image(this.playstate.img).height(30).aspectRatio(1)
-          .margin({left:25})
-        Column(){
-          Text(this.playstate.name).fontColor(Color.White)
-          Text(this.playstate.author).fontColor(Color.White)
-        }.height('100%')
-        .alignItems(HorizontalAlign.Start)
-        .justifyContent(FlexAlign.Center)
-        Blank()
-        Row(){
-          Image($r('app.media.pre')).onClick((event: ClickEvent) => {
-            this.isone=true
-            AvplayerUtils.pre()
-          }).height(30).aspectRatio(1)
 
-          Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
-            if(this.playstate.isPlay){
-              if(this.isone){
-                AvplayerUtils.play()
-                this.isone=false
-              }else{
-                AvplayerUtils.resume()
-              }
-            }else {
-              AvplayerUtils.pause()
-            }
-            this.playstate.isPlay=!this.playstate.isPlay
-          }).height(30).aspectRatio(1)
-          Image($r('app.media.next')).onClick((event: ClickEvent) => {
-            this.isone=true
-            AvplayerUtils.next()
-          }).height(30).aspectRatio(1)
-        }
+      //current高光时刻
+      if(this.current!=4){
+        Row({space:20}){
+          Image(this.playstate.img).height(30).aspectRatio(1)
+            .margin({left:25})
+          Column(){
+            Text(this.playstate.name).fontColor(Color.White)
+            Text(this.playstate.author).fontColor(Color.White)
+          }.height('100%')
+          .alignItems(HorizontalAlign.Start)
+          .justifyContent(FlexAlign.Center)
+          Blank()
+          Row(){
+            Image($r('app.media.pre')).onClick((event: ClickEvent) => {
+              this.isone=true
+              AvplayerUtils.pre()
+            }).height(30).aspectRatio(1)
+
+            Image(this.playstate.isPlay?$r('app.media.play'):$r('app.media.suspend')).onClick((event: ClickEvent) => {
+              // if(this.playstate.isPlay){
+              //   if(this.isone){
+              //     AvplayerUtils.play()
+              //     this.isone=false
+              //   }else{
+              //     AvplayerUtils.resume()
+              //   }
+              // }else {
+              //   AvplayerUtils.pause()
+              // }
+              AvplayerUtils.toggle()
+              this.playstate.isPlay=AvplayerUtils.playstate.isPlay
+            }).height(30).aspectRatio(1)
+            Image($r('app.media.next')).onClick((event: ClickEvent) => {
+              this.isone=true
+              AvplayerUtils.next()
+            }).height(30).aspectRatio(1)
+          }.width('35%')
+          .justifyContent(FlexAlign.SpaceBetween)
 
 
-      }.justifyContent(FlexAlign.End).height(60).alignItems(VerticalAlign.Center)
-      .width('100%')
-      .margin({bottom:60})
-      .backgroundColor('#1C1C21')
-      .padding({right:20})
-      .onClick(()=>{
-        router.pushUrl({ url:'pages/Index' })
-      })
+        }.justifyContent(FlexAlign.End).height(60).alignItems(VerticalAlign.Center)
+        .width('100%')
+        .margin({bottom:52})
+        .backgroundColor('#1C1C21')
+        .padding({right:20})
+        .onClick(()=>{
+          //进入播放页
+          router.pushUrl({ url:'pages/Index' })
+        })
+        .backgroundColor('#A37862')
+      }
+
     }
 
   }
 }
 
+
+//我的界面
 @Component
 struct me {
   list:looperlist=new looperlist()
@@ -282,103 +316,116 @@ struct me {
   }
 }
 
+
+//首页界面
 @Component
 struct homeitem {
   build() {
-    List(){
-      ListItem(){
-        Swiper(){
-          ForEach(swiperList,(item:string)=>{
+    //扯淡,这里要准备三个页面,吐了
+    Stack(){
+      List(){
+        ListItem(){
+          TextInput({placeholder:'No.9'})
+        }.width('90%')
+        .borderRadius(20)
+        .margin({top:10,bottom:10})
+        .backgroundColor(Color.White)
+        ListItem(){
+
+          Swiper(){
+            ForEach(swiperList,(item:string)=>{
               Image(item).width('100%')
-          })
-        }.autoPlay(true)
-        .loop(true)
-        .indicator(true)
-        .width('85%')
+            })
+          }.autoPlay(true)
+          .loop(true)
+          .indicator(true)
+          .width('85%')
 
 
-      }
-      ListItem(){
-        Column(){
+        }
+        ListItem(){
+          Column(){
+            Row(){
+              Text('每日推荐').fontColor('#C4C4C4')
+              Blank()
+              Text('更多') .fontColor('#454546')
+            }.width('100%')
+            .margin({top:10,bottom:10})
+            List(){
+              ForEach(dailyRecommend,(item:RecommendDailyType)=>{
+                ListItem(){
+                  Column(){
+                    Text(item.type)
+                      .backgroundColor(item.top)
+                      .width('100%')
+                      .textAlign(TextAlign.Center)
+                      .borderRadius({topLeft:10,topRight:10})
+
+
+                    Image(item.img).width('100%')
+                    Text(item.title)
+                      .backgroundColor(item.bottom)
+                      .width('100%')
+                      .fontSize(12)
+                      .layoutWeight(1)
+                      .borderRadius({bottomLeft:10,bottomRight:10})
+
+                  }
+                  // .height(150)
+                  .width('30%')
+
+                  .height(180)
+                  .margin({right:10})
+                }
+
+              })
+            }
+            .listDirection(Axis.Horizontal)
+            .scrollBar(BarState.Off)
+          }.borderRadius(20)
+
+        }.margin({top:20})
+        ListItem(){
+          // Text('推荐歌单').fontColor(Color.White)//和上面那个过渡的很像去抄上面的
           Row(){
-            Text('每日推荐').fontColor('#C4C4C4')
+            Text('推荐歌单').fontColor('#C4C4C4')
             Blank()
             Text('更多') .fontColor('#454546')
           }.width('100%')
           .margin({top:10,bottom:10})
+        }.width('100%')
+        ListItem(){
           List(){
-            ForEach(dailyRecommend,(item:RecommendDailyType)=>{
+            ForEach(recommendList,(item:RecommendListType)=>{
               ListItem(){
                 Column(){
-                  Text(item.type)
-                    .backgroundColor(item.top)
-                    .width('100%')
-                    .textAlign(TextAlign.Center)
-                    .borderRadius({topLeft:20,topRight:20})
+                  Stack(){
+                    Image(item.img).width('100%').borderRadius(20)
+                    Text(item.count).position({x:10,y:10}).fontColor(Color.White)
 
-
-                  Image(item.img).width('100%')
-                  Text(item.title)
-                    .backgroundColor(item.bottom)
-                    .width('100%')
+                  }.width('100%')
+                  Text(item.title).layoutWeight(1).fontColor(Color.White).width('100%')
+                    .padding({left:10,right:10})
                     .fontSize(12)
-                    .layoutWeight(1)
-                    .borderRadius({bottomLeft:20,bottomRight:20})
+                }.width('32%').height(180)
+                .margin({right:15})
 
-                }
-                // .height(150)
-                .width('30%')
-
-                .height(180)
-                .margin({right:10})
               }
-
             })
-          }
-          .listDirection(Axis.Horizontal)
+          }.listDirection(Axis.Horizontal)
           .scrollBar(BarState.Off)
-        }.borderRadius(20)
+        }
 
-      }.margin({top:20})
-      ListItem(){
-        // Text('推荐歌单').fontColor(Color.White)//和上面那个过渡的很像去抄上面的
-        Row(){
-          Text('推荐歌单').fontColor('#C4C4C4')
-          Blank()
-          Text('更多') .fontColor('#454546')
-        }.width('100%')
-        .margin({top:10,bottom:10})
-      }.width('100%')
-      ListItem(){
-        List(){
-          ForEach(recommendList,(item:RecommendListType)=>{
-            ListItem(){
-              Column(){
-                Stack(){
-                  Image(item.img).width('100%').borderRadius(20)
-                  Text(item.count).position({x:10,y:10}).fontColor(Color.White)
+      }.height('100%')
+      .width('100%')
+      .alignListItem(ListItemAlign.Center)
+      .backgroundColor('#111113')
+    }
 
-                }.width('100%')
-                Text(item.title).layoutWeight(1).fontColor(Color.White).width('100%')
-                  .padding({left:10,right:10})
-                  .fontSize(12)
-              }.width('32%').height(180)
-              .margin({right:15})
-
-            }
-          })
-        }.listDirection(Axis.Horizontal)
-        .scrollBar(BarState.Off)
-      }
-
-    }.height('100%')
-    .width('100%')
-    .alignListItem(ListItemAlign.Center)
-    .backgroundColor('#111113')
   }
 }
 
-
+//漫游界面
 @Component
 struct manyou {
   build() {
@@ -389,6 +436,7 @@ struct manyou {
             .height(100).aspectRatio(1)
             .fillColor('#FF588B')
             .backgroundColor(Color.White)
+            .borderRadius(5)
           Column(){
             Text('我喜欢的音乐')
               .margin({bottom:10})
@@ -396,6 +444,8 @@ struct manyou {
             Text('咸鱼音乐')
               .fontColor('#4F4843')
           }.alignSelf(ItemAlign.Center)
+          .alignItems(HorizontalAlign.Start)
+
           .margin({left:10})
         }.margin({top:30})
         .width('100%')
@@ -459,10 +509,15 @@ struct manyou {
           // }})
         })
         List(){
-          ForEach(songs,(item:SongItemType)=>{
+          ForEach(songs,(item:SongItemType,index:number)=>{
             ListItem(){
               Row(){
+                Text((index+1).toString())
+                  .margin({right:20})
+                  .fontColor(index==0?'#FFE426':index==1?'#EC6C87':index==2?'#3D5C63':'#A49A9A')
+                  .fontWeight(FontWeight.Bold)
                 Image(item.img).height(45).aspectRatio(1)
+                  .borderRadius(5)
                 Column(){
                   Text(item.name).alignSelf(ItemAlign.Start)
                   Text(item.author).alignSelf(ItemAlign.Start)
@@ -506,6 +561,8 @@ struct manyou {
   }
 }
 
+
+//发现界面--最简单的界面
 @Component
 struct find {
   build() {
@@ -515,19 +572,29 @@ struct find {
         .width('100%')
         .fontColor(Color.White)
         .margin({left:25})
+      // Divider()
+      //   .color(Color.White)
       List(){
         ForEach(songs,(item:SongItemType)=>{
           ListItem(){
-            Row(){
-              Image(item.img).height(45).aspectRatio(1)
-                .borderRadius(8)
-              Column(){
-                Text(item.name).alignSelf(ItemAlign.Start).fontSize(20).fontColor(Color.White)
-                  .fontWeight(FontWeight.Bold)
-                Text(item.author).alignSelf(ItemAlign.Start).fontSize(20).fontColor(Color.White)
-              }.margin({left:10})
-            }.borderRadius(20)
-            .margin({left:20,bottom:10})
+            Column(){
+              Row(){
+                Image(item.img).height(80).aspectRatio(1)
+                  .borderRadius(8)
+                Column(){
+                  Text(item.name).alignSelf(ItemAlign.Start).fontSize(20).fontColor(Color.White)
+                    .fontWeight(FontWeight.Bold)
+                  Text(item.author).alignSelf(ItemAlign.Start).fontSize(20).fontColor(Color.White)
+                }.margin({left:10})
+
+              }.borderRadius(20)
+              .margin({left:20,bottom:10})
+              // Divider()
+              //   .color(Color.White)
+            }.alignItems(HorizontalAlign.Start)
+            .width('100%')
+
+
           }
         })
       }.layoutWeight(1)
@@ -537,6 +604,7 @@ struct find {
   }
 }
 
+//动态界面
 @Component
 struct Dynamic {
   build() {

@@ -22,6 +22,8 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
+    AppStorage.setOrCreate<number>('mode',0)
+    //这个是模式的数据实现,0--顺序模式也就是默认,1是单例模式,2是随机模式
     windowStage.loadContent('pages/PageSplash', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
