@@ -228,7 +228,7 @@ struct Index {
         .justifyContent(FlexAlign.Center)
 
         Row(){
-          Text(Math.floor((this.playstate.time)/1000/60)+':'+Math.floor((this.playstate.time)/1000%60))
+          Text((Math.floor((this.playstate.time)/1000/60).toString().length==1?'0'+Math.floor((this.playstate.time)/1000/60).toString():Math.floor((this.playstate.time)/1000/60).toString())+':'+(Math.floor((this.playstate.time)/1000%60).toString().length==1?'0'+Math.floor((this.playstate.time)/1000%60).toString():Math.floor((this.playstate.time)/1000%60).toString()))
             .fontColor(Color.White)
           Slider({
             min:0,
@@ -241,7 +241,7 @@ struct Index {
             .selectedColor(Color.White)
             .trackColor('#A6A6A6')
 
-          Text(Math.floor((this.playstate.duration)/1000/60)+':'+Math.floor((this.playstate.duration)/1000%60))
+          Text((Math.floor((this.playstate.duration)/1000/60).toString().length==1?'0'+Math.floor((this.playstate.duration)/1000/60).toString():Math.floor((this.playstate.duration)/1000/60).toString())+':'+(Math.floor((this.playstate.duration)/1000%60).toString().length==1?'0'+Math.floor((this.playstate.duration)/1000%60).toString():Math.floor((this.playstate.duration)/1000%60).toString()))
             .fontColor(Color.White)
         }
         Row(){
@@ -336,8 +336,14 @@ struct Index {
       //音乐列表本地
       if(this.showlist){
         Column(){
-          Text('播放列表('+this.playstate.playList.length+')')
-            .margin({left:20,top:20,bottom:20})
+          Row(){
+            Image($r('app.media.p11')).width(30)
+              .margin({right:20})
+            Text('播放列表('+this.playstate.playList.length+')')
+              .fontColor(Color.White)
+          }
+          .margin({left:20,top:20,bottom:20})
+          .alignSelf(ItemAlign.Start)
 
           Divider().color(Color.White)
           List(){
@@ -359,7 +365,7 @@ struct Index {
                     .alignItems(HorizontalAlign.Start)
 
                   }.justifyContent(FlexAlign.Start)
-                  Divider().color(Color.White)
+                  Divider().color('#423539')
                 }.width('100%')
                 .alignItems(HorizontalAlign.Start)
                 .onClick(()=>{

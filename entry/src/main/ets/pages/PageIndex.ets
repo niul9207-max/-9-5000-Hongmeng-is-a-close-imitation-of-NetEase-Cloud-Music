@@ -596,8 +596,10 @@ struct manyou {
                 }.margin({left:10})
               }.borderRadius(20)
               .margin({left:20,bottom:10})
-              .onClick(()=>{
+              .onClick(async ()=>{
                 // ss.unshift(item)
+                if(AvplayerUtils.playstate.name==item.name) return;
+                await AvplayerUtils.avplayer.reset()
                 console.log('ken','PageIndex466添加的数据',JSON.stringify(item))
                 let pos=AvplayerUtils.playstate.playList.length==0 ?0:AvplayerUtils.playstate.playIndex+1
                 ss.splice(AvplayerUtils.playstate.playIndex+1,0,item)
@@ -610,13 +612,16 @@ struct manyou {
                   // playIndex: AvplayerUtils.playstate.playIndex+1,
                   time: 0,
                   duration: 0,
-                  isPlay: true,
+                  isPlay: false,
                   playMode: 'auto',
                   playList: ss
                 }
+                AvplayerUtils.playstate=s
                 emitter.emit(playertunnel2,{data:{
                   'mydata':JSON.stringify(s)
                 }})
+                AvplayerUtils.play()
+                AvplayerUtils.avplayer.play()
                 console.log('ken','PageIndex471','数据传输情况'+JSON.stringify(ss))
               })
             }
