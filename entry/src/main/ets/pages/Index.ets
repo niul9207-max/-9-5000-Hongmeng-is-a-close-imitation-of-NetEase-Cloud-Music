@@ -245,9 +245,11 @@ struct Index {
             .fontColor(Color.White)
         }
         Row(){
-          Image(this.mode==1?$r('app.media.ic_auto'): this.mode==2?$r('app.media.ic_repeat'):$r('app.media.ic_random')).onClick(async (event: ClickEvent) => {
-            if(this.mode==3){
-              this.mode=1
+          Image(this.mode==0?$r('app.media.ic_auto'): this.mode==1?$r('app.media.ic_repeat'):$r('app.media.ic_random'))
+            .fillColor(Color.White)
+            .onClick(async (event: ClickEvent) => {
+            if(this.mode==2){
+              this.mode=0
             }else this.mode++
 
           }).height(45).aspectRatio(1)
@@ -287,16 +289,20 @@ struct Index {
             .fillColor(Color.White)
             .onClick(async (event: ClickEvent) => {
             this.isone=true
-            await AvplayerUtils.next()
+            await AvplayerUtils.nextN()
+            // await AvplayerUtils.next()
 
 
 
           }).height(45).aspectRatio(1)
           // .fillColor(Color.White)
-          Image($r('app.media.ic_song_list')).onClick(async (event: ClickEvent) => {
+          Image($r('app.media.ic_song_list'))
+            .fillColor(Color.White)
+            .onClick(async (event: ClickEvent) => {
             if(AvplayerUtils.playstate.playList){
               this.showlist=true
             }
+
 
           }).height(45).aspectRatio(1)
         }.justifyContent(FlexAlign.SpaceAround)
@@ -311,12 +317,21 @@ struct Index {
         this.showlist=false
       })
       //暂时不想去碰的没什么卵用的注释--渐变色
-      .linearGradient(
-        {
-          direction:GradientDirection.Bottom,
-          colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
-        }
-      )
+      // .linearGradient(
+      //   {
+      //     direction:GradientDirection.Bottom,
+      //     colors:[[this.topcolor,0.0],[this.bottomcolor,1.0]]
+      //   }
+      // )
+      .linearGradient({
+        angle: 180, // 渐变方向:180 = 从上到下
+        colors: [
+          ['#1DB954', 0.0],  // 顶部:当前的绿色
+          ['#0B6B35', 0.6],  // 中部:深一点的绿
+          ['#0A1F14', 1.0]   // 底部:接近黑绿,让按钮和字更突出
+        ]
+      })
+      .backgroundColor('#03DC6C')
 
       //音乐列表本地
       if(this.showlist){
@@ -364,7 +379,7 @@ struct Index {
         .height('50%')
         .width('100%')
       }
-    }
+    }.margin({top:20,bottom:20})
 
 
   }

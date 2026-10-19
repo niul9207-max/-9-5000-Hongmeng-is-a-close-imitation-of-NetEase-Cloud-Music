@@ -119,7 +119,7 @@ export class AvplayerUtils{
             if(mode==0){
               AvplayerUtils.next()
             console.log('ken1','这个时候状态是','顺序',mode)
-            }else if(mode==2){
+            }else if(mode==1){
               // await AvplayerUtils.avplayer.prepare()
               AvplayerUtils.avplayer.play()
               console.log('ken1','这个时候状态是','单例')
@@ -222,6 +222,41 @@ export class AvplayerUtils{
 
    }
 
+  //下一首,也要emit
+  static async nextN(){
+
+    let mode=AppStorage.get<number>('mode')
+    if(AppStorage.get<number>('mode')==0){
+      AvplayerUtils.next()
+      console.log('ken1','这个时候状态是','顺序')
+    }else if(AppStorage.get<number>('mode')==1){
+      // await AvplayerUtils.avplayer.prepare()
+      // AvplayerUtils.avplayer.play()
+      // console.log('ken1','这个时候状态是','单例')
+      AvplayerUtils.seek(0)
+
+    }else {
+      console.log('ken1','这个时候状态是','随机')
+      let ind=Math.floor(Math.random()*10000%AvplayerUtils.playstate.playList.length)
+      // let ind=++AvplayerUtils.playstate.playIndex
+      await AvplayerUtils.avplayer.reset()
+      AvplayerUtils.playstate.img=AvplayerUtils.playstate.playList[ind].img
+      AvplayerUtils.playstate.name=AvplayerUtils.playstate.playList[ind].name
+      AvplayerUtils.playstate.url=AvplayerUtils.playstate.playList[ind].url
+      AvplayerUtils.playstate.author=AvplayerUtils.playstate.playList[ind].author
+      AvplayerUtils.playstate.isPlay=false
+      AvplayerUtils.playstate.time=0
+      AvplayerUtils.playstate.duration=0
+      console.log('ken','状态上:'+AvplayerUtils.avplayer.state)
+      AvplayerUtils.play()
+      console.log('ken','状态下:'+AvplayerUtils.avplayer.state)
+      emitter.emit(playertunnel2,{data:{
+        'mydata':JSON.stringify(AvplayerUtils.playstate)
+      }})
+    }
+
+  }
+
 //下一首,也要emit
    static async next(){
       if(AvplayerUtils.playstate.playIndex>=AvplayerUtils.playstate.playList.length-1){
@@ -267,6 +302,7 @@ export class AvplayerUtils{
   }
 
 //很简单,找到音乐并播放,就是togglemusic和next的结合版,由于只是复用代码,加上我稍微改了一下,我可能也不是很清楚一些东西
+  //这个东西有bug
   static async findmusic_play(sss:SongItemType){
     let ind=AvplayerUtils.playstate.playList.findIndex((item:SongItemType)=>{return item.name==sss.name})
     if(ind>=0){
@@ -284,6 +320,7 @@ export class AvplayerUtils{
         'mydata':JSON.stringify(AvplayerUtils.playstate)
       }})
     }else {
+      await AvplayerUtils.avplayer.reset()
       let item=sss
       let pos=AvplayerUtils.playstate.playList.length==0 ?0:AvplayerUtils.playstate.playIndex+1
       ss.splice(AvplayerUtils.playstate.playIndex+1,0,item)
@@ -296,13 +333,23 @@ export class AvplayerUtils{
         // playIndex: AvplayerUtils.playstate.playIndex+1,
         time: 0,
         duration: 0,
-        isPlay: true,
+        isPlay: false,
         playMode: 'auto',
         playList: ss
       }
+      AvplayerUtils.playstate=s
+      // AvplayerUtils.avplayer.play()
       emitter.emit(playertunnel2,{data:{
         'mydata':JSON.stringify(s)
       }})
+      console.log('k1',AvplayerUtils.avplayer.state)
+      AvplayerUtils.play()
+      console.log('k1',AvplayerUtils.avplayer.state)
+
+      AvplayerUtils.avplayer.play()
+      console.log('k1',AvplayerUtils.avplayer.state)
+
+
     }
 
   }

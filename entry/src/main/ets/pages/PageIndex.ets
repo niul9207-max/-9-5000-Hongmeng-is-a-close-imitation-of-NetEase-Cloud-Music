@@ -31,9 +31,9 @@ struct PageIndex {
       // #EC6C87
       // Image($r('app.media.bottom1')).height(20).asptgectRatio(1)
       Image(image).height(20).aspectRatio(1)
-        .fillColor(this.current==index?'#EC6C87':'#E6E6E6')
+        .fillColor(this.current==index?'#EC6C87':Color.Black)
       Text(tabname)
-        .fontColor(this.current==index?'#EC6C87':'#E6E6E6')
+        .fontColor(this.current==index?'#EC6C87':Color.Black)
     }
 
   }
@@ -131,6 +131,7 @@ struct PageIndex {
           }.height('100%')
           .alignItems(HorizontalAlign.Start)
           .justifyContent(FlexAlign.Center)
+          .layoutWeight(1)
           Blank()
           Row(){
             Image($r('app.media.pre')).onClick((event: ClickEvent) => {
@@ -246,7 +247,7 @@ struct me {
             LazyForEach(this.list,(item:RecommendListType)=>{
               ListItem(){
                 Image(item.img).borderRadius(10)
-              }.padding(10)
+              }.padding(5)
 
             })
           }.scrollBar(BarState.Off)
@@ -255,7 +256,7 @@ struct me {
             LazyForEach(this.list,(item:RecommendListType)=>{
               ListItem(){
                 Image(item.img).borderRadius(10)
-              }.padding(10)
+              }.padding(5)
 
             })
           }.scrollBar(BarState.Off)
@@ -264,7 +265,7 @@ struct me {
             LazyForEach(this.list,(item:RecommendListType)=>{
               ListItem(){
                 Image(item.img).borderRadius(10)
-              }.padding(10)
+              }.padding(5)
 
             })
           }.scrollBar(BarState.Off)
@@ -273,7 +274,7 @@ struct me {
             LazyForEach(this.list,(item:RecommendListType)=>{
               ListItem(){
                 Image(item.img).borderRadius(10)
-              }.padding(10)
+              }.padding(5)
 
             })
           }.scrollBar(BarState.Off)
@@ -333,8 +334,9 @@ struct homeitem {
     //搜索功能里面的点击播放暂时不写
     Stack({alignContent:Alignment.Top}){
       TextInput({placeholder:'No.9',text:$$this.search})
+        // .padding({left:15,right:15})
         .zIndex(100)
-        .width('100%')
+        .width('90%')
         .height(40)
         .backgroundColor(Color.White)
         .margin({top:10})
@@ -474,6 +476,8 @@ struct homeitem {
                   Text(item.title).layoutWeight(1).fontColor(Color.White).width('100%')
                     .padding({left:10,right:10})
                     .fontSize(12)
+                    .maxLines(2)
+                    .textOverflow({ overflow:TextOverflow.Ellipsis })
                 }.width('32%').height(180)
                 .margin({right:15})
 

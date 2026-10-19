@@ -1,6 +1,7 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { AvplayerUtils } from '../utils/AvplayerUtils';
 
 const DOMAIN = 0x0000;
 
@@ -23,6 +24,7 @@ export default class EntryAbility extends UIAbility {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
     AppStorage.setOrCreate<number>('mode',0)
+    // AvplayerUtils.init()
     //这个是模式的数据实现,0--顺序模式也就是默认,1是单例模式,2是随机模式
     //这个好像搞混了,以实际情况为主
     windowStage.loadContent('pages/PageSplash', (err) => {
